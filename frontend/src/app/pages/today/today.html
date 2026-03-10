@@ -1,0 +1,120 @@
+<div class="hero-shell">
+  <!-- Background Animation (desktop) -->
+  <div class="hero-bg hero-bg-desktop" aria-hidden="true">
+    <div class="us-project" data-us-project="OMzqyUv6M3kSnv0JeAtC"></div>
+  </div>
+
+  <!-- Mobile stars background -->
+  <div class="hero-bg hero-bg-mobile stars-bg" aria-hidden="true"></div>
+
+  <!-- Corner frame accents -->
+  <div class="frame frame-tl" aria-hidden="true"></div>
+  <div class="frame frame-tr" aria-hidden="true"></div>
+  <div class="frame frame-bl" aria-hidden="true"></div>
+  <div class="frame frame-br" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <div class="page">
+      <div class="header">
+        <h2 class="h1">Today</h2>
+        <div class="sub">{{ date }}</div>
+      </div>
+
+  <div class="card">
+    <div class="form">
+      <input class="input" asciiOnly placeholder="Exercise (Bench Press)" [(ngModel)]="exerciseName" />
+
+      <input
+        class="input"
+        asciiOnly
+        placeholder='kg (e.g., 80 or "40+bar")'
+        inputmode="decimal"
+        [(ngModel)]="kg"
+        (ngModelChange)="onKgInput($event)"
+      />
+
+      <input class="input" type="number" placeholder="reps" [(ngModel)]="reps" />
+      <input class="input" type="number" placeholder="RIR" [(ngModel)]="rir" />
+
+      <button class="btn" (click)="logSet()">Log set</button>
+    </div>
+
+    <div *ngIf="kgError" class="err">{{ kgError }}</div>
+
+    <div class="sub" style="margin-top:10px;">
+      Tip: Set baselines in Settings to see avg/last comparisons.
+    </div>
+  </div>
+
+  <div class="exercise-grid">
+    <div class="exercise-card" *ngFor="let s of stats.list()">
+      <div class="row">
+        <div class="title">{{ s.exerciseName }}</div>
+        <span class="pill">Avg e1RM: {{ s.currentAvgE1RM }}</span>
+      </div>
+
+      <div class="metrics">
+        <span class="metric">Baseline: {{ s.baselineE1RM }}</span>
+        <span class="metric">Last: {{ (snap(s.exerciseName)?.lastSessionBestE1RM ?? '-') }}</span>
+        <span class="metric">This week: {{ (snap(s.exerciseName)?.thisWeekAvgE1RM ?? '-') }}</span>
+      </div>
+    </div>
+  </div>
+
+      <!-- Bottom half: diet for today -->
+      <div class="card" style="margin-top:20px;">
+        <div class="row" style="justify-content:space-between; align-items:center;">
+          <div class="title">Diet today</div>
+          <div class="sub">{{ date }}</div>
+        </div>
+
+    <div *ngIf="dietDay === null || dietDay.foods.length === 0" class="sub" style="margin-top:8px;">
+      No foods logged yet.
+    </div>
+
+    <table *ngIf="dietDay !== null && dietDay.foods.length > 0" style="width:100%; margin-top:8px; font-size:13px; border-collapse:collapse;">
+      <thead>
+        <tr style="text-align:left; border-bottom:1px solid #333;">
+          <th style="padding:4px 0; width:32px;"></th>
+          <th style="padding:4px 0;">Food</th>
+          <th style="padding:4px 0;">Grams</th>
+          <th style="padding:4px 0;">kcal</th>
+          <th style="padding:4px 0;">P</th>
+          <th style="padding:4px 0;">C</th>
+          <th style="padding:4px 0;">F</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of dietDay!.foods" style="border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:4px 0;">
+            <button
+              type="button"
+              (click)="deleteFood(f)"
+              style="border:none; background:transparent; color:#f66; cursor:pointer; font-size:14px; padding:0 4px;"
+              title="Remove"
+            >
+              ×
+            </button>
+          </td>
+          <td style="padding:4px 0;">{{ f.name }}</td>
+          <td style="padding:4px 0;">{{ f.grams }}</td>
+          <td style="padding:4px 0;">{{ f.kcal }}</td>
+          <td style="padding:4px 0;">{{ f.p }}</td>
+          <td style="padding:4px 0;">{{ f.c }}</td>
+          <td style="padding:4px 0;">{{ f.f }}</td>
+        </tr>
+        <tr style="border-top:1px solid #333; font-weight:600;">
+          <td></td>
+          <td style="padding:4px 0;">Total</td>
+          <td style="padding:4px 0;">{{ dietTotals.grams }}</td>
+          <td style="padding:4px 0;">{{ dietTotals.kcal }}</td>
+          <td style="padding:4px 0;">{{ dietTotals.p }}</td>
+          <td style="padding:4px 0;">{{ dietTotals.c }}</td>
+          <td style="padding:4px 0;">{{ dietTotals.f }}</td>
+        </tr>
+      </tbody>
+    </table>
+      </div>
+    </div>
+  </div>
+</div>

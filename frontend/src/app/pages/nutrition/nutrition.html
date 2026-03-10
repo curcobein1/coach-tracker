@@ -1,0 +1,138 @@
+<section class="nutrition-page">
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="query"
+      placeholder="Search foods..."
+      (keyup.enter)="searchFoods()"
+    />
+    <button type="button" (click)="searchFoods()">Search</button>
+  </div>
+
+  @if (error) {
+  <div class="error">
+    {{ error }}
+  </div>
+  }
+
+  <div class="nutrition-layout">
+    <div class="results-panel">
+      <h3>Results</h3>
+
+      @if (isSearching) {
+      <div>Searching...</div>
+      }
+
+      @if (!isSearching && results.length === 0) {
+      <div>No foods yet.</div>
+      }
+
+      @for (food of results; track food.fdcId) {
+      <button
+        type="button"
+        class="food-card"
+        (click)="selectFood(food)"
+      >
+        <div class="food-title">{{ food.description }}</div>
+
+        @if (food.foodCategory) {
+        <div class="food-subtitle">{{ food.foodCategory }}</div>
+        }
+
+        <div class="food-macros">
+          <span>{{ food.calories ?? '-' }} kcal</span>
+          <span>P {{ food.protein ?? '-' }}</span>
+          <span>C {{ food.carbs ?? '-' }}</span>
+          <span>F {{ food.fat ?? '-' }}</span>
+        </div>
+
+        <div class="food-secondary">
+          <span>Fiber {{ food.fiber ?? '-' }}</span>
+          <span>Sugar {{ food.sugar ?? '-' }}</span>
+          <span>Sodium {{ food.sodium ?? '-' }}</span>
+        </div>
+      </button>
+      }
+    </div>
+
+    <div class="detail-panel">
+      <h3>Food Details</h3>
+
+      @if (isLoadingDetail) {
+      <div>Loading details...</div>
+      }
+
+      @if (!isLoadingDetail && !selectedFood) {
+      <div>Select a food to view details.</div>
+      }
+
+      @if (selectedFood) {
+      <div class="detail-card">
+        <h4>{{ selectedFood.description }}</h4>
+
+        @if (selectedFood.foodCategory) {
+        <div class="food-subtitle">{{ selectedFood.foodCategory }}</div>
+        }
+
+        <div class="summary-grid">
+          <div>Calories: {{ selectedFood.summary.calories ?? '-' }} kcal</div>
+          <div>Protein: {{ selectedFood.summary.protein ?? '-' }} g</div>
+          <div>Carbs: {{ selectedFood.summary.carbs ?? '-' }} g</div>
+          <div>Fat: {{ selectedFood.summary.fat ?? '-' }} g</div>
+          <div>Fiber: {{ selectedFood.summary.fiber ?? '-' }} g</div>
+          <div>Sugar: {{ selectedFood.summary.sugar ?? '-' }} g</div>
+          <div>Sodium: {{ selectedFood.summary.sodium ?? '-' }} mg</div>
+        </div>
+
+        @if (selectedFood.micronutrients.vitamins.length > 0) {
+        <div class="nutrient-section">
+          <h5>Vitamins</h5>
+          @for (item of selectedFood.micronutrients.vitamins; track trackByNutrientKey($index, item)) {
+          <div class="nutrient-row">
+            <span>{{ item.label }}</span>
+            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+          </div>
+          }
+        </div>
+        }
+
+        @if (selectedFood.micronutrients.majorMinerals.length > 0) {
+        <div class="nutrient-section">
+          <h5>Major Minerals</h5>
+          @for (item of selectedFood.micronutrients.vitamins; track item.key) {
+          <div class="nutrient-row">
+            <span>{{ item.label }}</span>
+            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+          </div>
+          }
+        </div>
+        }
+
+        @if (selectedFood.micronutrients.traceMinerals.length > 0) {
+        <div class="nutrient-section">
+          <h5>Trace Minerals</h5>
+          @for (item of selectedFood.micronutrients.traceMinerals; track trackByNutrientKey($index, item)) {
+          <div class="nutrient-row">
+            <span>{{ item.label }}</span>
+            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+          </div>
+          }
+        </div>
+        }
+
+        @if (selectedFood.other.length > 0) {
+        <div class="nutrient-section">
+          <h5>Other</h5>
+          @for (item of selectedFood.other; track trackByNutrientKey($index, item)) {
+          <div class="nutrient-row">
+            <span>{{ item.label }}</span>
+            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</section>

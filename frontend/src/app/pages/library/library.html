@@ -1,0 +1,49 @@
+<div class="wrap">
+  <div class="header">
+    <h2>Exercise Library</h2>
+    <button class="btn ghost" type="button" (click)="resetSeed()">Reset seed</button>
+  </div>
+
+  <div class="filters">
+    <input class="input" placeholder="Search name or tag" [(ngModel)]="q" name="q" />
+    <select class="input" [(ngModel)]="group" name="group">
+      <option>All</option>
+      <option>Back</option>
+      <option>Chest</option>
+      <option>Legs</option>
+      <option>Shoulders</option>
+      <option>Arms</option>
+      <option>Core</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <input class="input" placeholder="New exercise name" [(ngModel)]="name" name="name" />
+      <select class="input" [(ngModel)]="newGroup" name="newGroup">
+        <option>Back</option>
+        <option>Chest</option>
+        <option>Legs</option>
+        <option>Shoulders</option>
+        <option>Arms</option>
+        <option>Core</option>
+      </select>
+      <input class="input" placeholder="tags: vertical_pull, lats" [(ngModel)]="tagsText" name="tagsText" />
+      <button class="btn" type="button" (click)="add()">Add</button>
+    </div>
+  </div>
+
+  <div class="list">
+    <div class="item" *ngFor="let ex of list">
+      <div class="left">
+        <div class="name">{{ ex.name }}</div>
+        <div class="meta">{{ ex.group }}</div>
+        <div class="tags" *ngIf="ex.tags.length">
+          <span class="tag" *ngFor="let t of ex.tags">{{ t }}</span>
+        </div>
+      </div>
+
+      <button class="icon danger" type="button" (click)="remove(ex.id)">✕</button>
+    </div>
+  </div>
+</div>

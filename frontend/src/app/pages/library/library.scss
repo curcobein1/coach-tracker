@@ -1,0 +1,22 @@
+.wrap { max-width:900px; margin:0 auto; }
+.header { display:flex ; justify-content: space-between; align-items: center; margin-bottom: 12px;}
+.filters{display:flex; gap:10px; margin-bottom:12px; }
+
+.card{ border: 1px solid #2a2a2a; border-radius: 14px; padding: 12px; background: #0f0f0f; margin-bottom: 12px;}
+.grid { display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap:8px; }
+
+.input { padding: 10px; border-radius: 10px; border:1px solid #333; background:#0b0b0b; color:#fff;}
+
+.btn{ padding:10px 12px; border-radius:10px; border: 1px solid #333; background:#fff; color: #000; font-weight:800; cursor:pointer;}
+.btn.ghost{ background: transparent; color:#fff;}
+
+.list { display:flex; flex-direction: colmun; gap:8px;}
+.item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px; border:1px solid #2a2a2a; border-radius:12px;}
+.name { font-weight: 900;}
+.meta { opacity:.7; font-size: 12px; margin-top: 2px;}
+
+.tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.tag { font-size: 11px; padding: 4px 8px; border-radius: 999px; border:1px solid #333; background: #141414; }
+
+.icon { padding: 8px 10px; border-radius: 10px; border:1px solid #333; background: #151515; color: #fff; cursor:pointer;}
+.icon.danger {border-color: #7a2a2a; color: #ffbdbd;}

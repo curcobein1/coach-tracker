@@ -1,0 +1,112 @@
+<div class="wrap">
+  <div class="header">
+    <h2>Plan</h2>
+    <button class="btn ghost" (click)="reset()">Reset week</button>
+  </div>
+
+  <div class="template-grid">
+    <div class="template-card" *ngFor="let t of templates">
+      <div class="template-title">{{ t.title }}</div>
+      <div class="template-sub">Single-day split</div>
+
+      <div class="template-peek">
+        <div class="peek" *ngFor="let ex of t.preview">{{ ex }}</div>
+      </div>
+
+      <button class="btn ghost" type="button" (click)="applyTemplate(t.kind)">
+        Apply to {{ selectedDay.title }}
+      </button>
+    </div>
+  </div>
+
+  <div class="days">
+    <button
+      *ngFor="let d of plan.days"
+      class="day"
+      [class.active]="d.id === selectedDayId"
+      (click)="selectDay(d.id)"
+      type="button"
+    >
+      <div class="t">{{ d.title }}</div>
+      <div class="c">{{ d.items.length }} items</div>
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="label">Editing:</div>
+      <div class="value">{{ selectedDay.title }}</div>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+      <button class="btn ghost" type="button" (click)="clearDay()">Clear day</button>
+    </div>
+
+    <div class="grid">
+      <input class="input" placeholder="Exercise name" [(ngModel)]="exerciseName" name="exerciseName" />
+      <input class="input" type="number" placeholder="sets" [(ngModel)]="sets" name="sets" />
+      <input class="input" placeholder="rep range (6-10)" [(ngModel)]="repRange" name="repRange" />
+      <input class="input" type="number" placeholder="RIR" [(ngModel)]="rir" name="rir" />
+
+      <select class="input" [(ngModel)]="group" name="group">
+        <option>Back</option>
+        <option>Chest</option>
+        <option>Legs</option>
+        <option>Shoulders</option>
+        <option>Arms</option>
+        <option>Core</option>
+      </select>
+
+      <input class="input" placeholder="tags: vertical_pull, lats" [(ngModel)]="tagsText" name="tagsText" />
+      <button class="btn" type="button" (click)="addItem()">Add</button>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <div class="label">Filter:</div>
+      <select class="input" [(ngModel)]="filterGroup" name="filterGroup" style="max-width:220px;">
+        <option>All</option>
+        <option>Back</option>
+        <option>Chest</option>
+        <option>Legs</option>
+        <option>Shoulders</option>
+        <option>Arms</option>
+        <option>Core</option>
+      </select>
+    </div>
+
+    <div class="list" *ngIf="selectedDay.items.length === 0">
+      <div class="muted">No items yet. Add your first exercise above.</div>
+    </div>
+
+    <div class="list" *ngIf="selectedDay.items.length > 0">
+      <div
+        class="item"
+        *ngFor="let it of filteredItems"
+      >
+        <div class="left">
+          <div class="name">{{ it.exerciseName }}</div>
+
+          <div class="meta">
+            {{ it.sets }} sets • {{ it.repRange }} reps
+            <span *ngIf="it.rir !== null">• RIR {{ it.rir }}</span>
+            • {{ it.group }}
+          </div>
+
+          <div class="tags" *ngIf="it.tags.length">
+            <span class="tag" *ngFor="let t of it.tags">{{ t }}</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="icon" type="button" (click)="moveUp(it.id)">↑</button>
+          <button class="icon" type="button" (click)="moveDown(it.id)">↓</button>
+          <button class="icon danger" type="button" (click)="remove(it.id)">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    Base plan first. Exercise library plugs in next.
+  </div>
+</div>
