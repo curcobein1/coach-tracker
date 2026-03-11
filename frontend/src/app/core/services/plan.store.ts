@@ -1,149 +1,213 @@
 import { Injectable } from '@angular/core';
-import { PlansApiService } from './plans-api.service';
+import { PlansApiService, TrainingPlanDto } from './plans-api.service';
 
+export interface PlanItem {
+  id: number;
+  exerciseId: number;
+  orderIndex: number;
 
-export type PlanItem = {
-  id: string;
+  targetSets: number;
+  targetReps?: string | null;
+  targetRestSeconds?: number | null;
+  notes?: string | null;
+
+  // legacy UI compatibility
   exerciseName: string;
   sets: number;
-  repRange: string;
+  repRange?: string | null;
   rir: number | null;
-  group: string;
   tags: string[];
-  notes?: string;
-};
+  group?: string | null;
+}
 
-export type PlanDay = {
-  id: string;
+export interface PlanDay {
+  id: number;
+  dayOfWeek: number;
+  name: string;
+
+  // legacy UI compatibility
   title: string;
+
   items: PlanItem[];
-};
+}
 
-export type WeeklyPlan = {
-  version: number;
+export interface PlanState {
+  id: number;
+  name: string;
   days: PlanDay[];
-  updatedAt: string;
-};
-
-function uid(): string {
-  return Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
 }
 
-
-const KEY = 'coach_tracker_weekly_plan_v1';
-
-function defaultPlan(): WeeklyPlan {
-  const dayTitles = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  return {
-    version: 1,
-    updatedAt: new Date().toISOString(),
-    days: dayTitles.map((t) => ({
-      id: t.toLowerCase(),
-      title: t,
-      items: [],
-    })),
-  };
-}
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class PlanStore {
-  activePlan: any = null;
-  private plan: WeeklyPlan = this.load();
+  private state: PlanState = {
+    id: 0,
+    name: 'Active Plan',
+    days: []
+  };
 
-  constructor(private plansApi: PlansApiService) {}
+  constructor(private api: PlansApiService) {}
 
-  loadActivePlan() {
-    this.plansApi.getActivePlan().subscribe((data: any) => {
-      console.log('[FRONTEND] active plan response', data);
-      this.activePlan = data;
+  get(): PlanState {
+    return structuredClone(this.state);
+  }
+
+  loadActivePlan(): void {
+    this.api.getActivePlan().subscribe({
+      next: (plan) => {
+        this.state = this.mapFromDto(plan);
+      },
+      error: (err) => {
+        console.error('Failed to load active plan', err);
+      }
     });
   }
 
-  get(): WeeklyPlan {
-    return this.plan;
+  saveActivePlan(): void {
+    const dto = this.mapToDto(this.state);
+
+    this.api.saveActivePlan(dto).subscribe({
+      next: (saved) => {
+        this.state = this.mapFromDto(saved);
+      },
+      error: (err) => {
+        console.error('Failed to save active plan', err);
+      }
+    });
   }
 
-  set(next: WeeklyPlan) {
-    this.plan = { ...next, updatedAt: new Date().toISOString() };
-    localStorage.setItem(KEY, JSON.stringify(this.plan));
+  addItem(dayId: number, item: Partial<PlanItem>): void {
+    const day = this.state.days.find((d) => d.id === dayId);
+    if (!day) return;
+
+    const nextId =
+      day.items.length > 0 ? Math.max(...day.items.map((i) => i.id)) + 1 : 1;
+
+    const nextOrder =
+      day.items.length > 0 ? Math.max(...day.items.map((i) => i.orderIndex)) + 1 : 0;
+
+    day.items.push({
+      id: item.id ?? nextId,
+      exerciseId: item.exerciseId ?? 0,
+      orderIndex: item.orderIndex ?? nextOrder,
+
+      targetSets: item.targetSets ?? 3,
+      targetReps: item.targetReps ?? '8-12',
+      targetRestSeconds: item.targetRestSeconds ?? null,
+      notes: item.notes ?? null,
+
+      exerciseName: item.exerciseName ?? `Exercise ${item.exerciseId ?? 0}`,
+      sets: item.sets ?? item.targetSets ?? 3,
+      repRange: item.repRange ?? item.targetReps ?? '8-12',
+      rir: item.rir ?? null,
+      tags: item.tags ?? [],
+      group: item.group ?? null
+    });
   }
 
-  reset() {
-    this.set(defaultPlan());
+  removeItem(dayId: number, itemId: number): void {
+    const day = this.state.days.find((d) => d.id === dayId);
+    if (!day) return;
+
+    day.items = day.items.filter((i) => i.id !== itemId);
+    this.reindex(day);
   }
 
-  addItem(dayId: string, item: Omit<PlanItem, 'id'>) {
-    const plan = this.get();
-    const days = plan.days.map((d) => {
-      if (d.id !== dayId) return d;
-      return {
+  moveItem(dayId: number, itemId: number, direction: number): void {
+    const day = this.state.days.find((d) => d.id === dayId);
+    if (!day) return;
+
+    const index = day.items.findIndex((i) => i.id === itemId);
+    if (index === -1) return;
+
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= day.items.length) return;
+
+    [day.items[index], day.items[newIndex]] = [day.items[newIndex], day.items[index]];
+    this.reindex(day);
+  }
+
+  updateItem(dayId: number, itemId: number, patch: Partial<PlanItem>): void {
+    const day = this.state.days.find((d) => d.id === dayId);
+    if (!day) return;
+
+    const item = day.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    Object.assign(item, patch);
+
+    // keep legacy + backend fields aligned
+    if (patch.targetSets !== undefined) item.sets = patch.targetSets;
+    if (patch.targetReps !== undefined) item.repRange = patch.targetReps;
+    if (patch.sets !== undefined) item.targetSets = patch.sets;
+    if (patch.repRange !== undefined) item.targetReps = patch.repRange;
+  }
+
+  reset(): void {
+    this.state = {
+      id: this.state.id,
+      name: this.state.name,
+      days: this.state.days.map((d) => ({
         ...d,
-        items: [...d.items, { id: uid(), ...item }],
-      };
+        items: []
+      }))
+    };
+  }
+
+  private reindex(day: PlanDay): void {
+    day.items.forEach((item, index) => {
+      item.orderIndex = index;
     });
-    this.set({ ...plan, days });
   }
 
-  updateItem(dayId: string, itemId: string, patch: Partial<PlanItem>) {
-    const plan = this.get();
-    const days = plan.days.map((d) => {
-      if (d.id !== dayId) return d;
-      return {
-        ...d,
-        items: d.items.map((it) => (it.id === itemId ? { ...it, ...patch } : it)),
-      };
-    });
-    this.set({ ...plan, days });
+  private mapFromDto(dto: TrainingPlanDto): PlanState {
+    return {
+      id: dto.id,
+      name: dto.name,
+      days: dto.days.map((d) => ({
+        id: d.id,
+        dayOfWeek: d.dayOfWeek,
+        name: d.name,
+        title: d.name,
+        items: d.items.map((i) => ({
+          id: i.id,
+          exerciseId: i.exerciseId,
+          orderIndex: i.orderIndex,
+          targetSets: i.targetSets,
+          targetReps: i.targetReps ?? null,
+          targetRestSeconds: i.targetRestSeconds ?? null,
+          notes: i.notes ?? null,
+
+          exerciseName: `Exercise ${i.exerciseId}`,
+          sets: i.targetSets,
+          repRange: i.targetReps ?? null,
+          rir: null,
+          tags: [],
+          group: null
+        }))
+      }))
+    };
   }
 
-  removeItem(dayId: string, itemId: string) {
-    const plan = this.get();
-    const days = plan.days.map((d) => {
-      if (d.id !== dayId) return d;
-      return {
-        ...d,
-        items: d.items.filter((it) => it.id !== itemId),
-      };
-    });
-    this.set({ ...plan, days });
-  }
-
-  moveItem(dayId: string, itemId: string, dir: -1 | 1) {
-    const plan = this.get();
-    const days = plan.days.map((d) => {
-      if (d.id !== dayId) return d;
-
-      const idx = d.items.findIndex((x) => x.id === itemId);
-      if (idx < 0) return d;
-
-      const nextIdx = idx + dir;
-      if (nextIdx < 0 || nextIdx >= d.items.length) return d;
-
-      const items = [...d.items];
-      const [removed] = items.splice(idx, 1);
-      items.splice(nextIdx, 0, removed);
-
-      return { ...d, items };
-    });
-
-    this.set({ ...plan, days });
-  }
-
-  getDayByDate(date: Date): PlanDay {
-    const map = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-    const id = map[date.getDay()];
-    return this.plan.days.find((d) => d.id === id) ?? this.plan.days[0];
-  }
-
-  private load(): WeeklyPlan {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return defaultPlan();
-      const parsed = JSON.parse(raw);
-      if (!parsed?.days?.length) return defaultPlan();
-      return parsed as WeeklyPlan;
-    } catch {
-      return defaultPlan();
-    }
+  private mapToDto(state: PlanState): TrainingPlanDto {
+    return {
+      id: state.id,
+      name: state.name,
+      days: state.days.map((d) => ({
+        id: d.id,
+        dayOfWeek: d.dayOfWeek,
+        name: d.name || d.title,
+        items: d.items.map((i) => ({
+          id: i.id,
+          exerciseId: i.exerciseId,
+          orderIndex: i.orderIndex,
+          targetSets: i.targetSets ?? i.sets,
+          targetReps: i.targetReps ?? i.repRange ?? null,
+          targetRestSeconds: i.targetRestSeconds ?? null,
+          notes: i.notes ?? null
+        }))
+      }))
+    };
   }
 }

@@ -3,6 +3,7 @@ using System;
 using CoachTracker.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoachTracker.api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311115049_AddWorkoutExecutionTables")]
+    partial class AddWorkoutExecutionTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
@@ -76,7 +79,7 @@ namespace CoachTracker.api.Migrations
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -105,13 +108,13 @@ namespace CoachTracker.api.Migrations
                     b.Property<int>("OrderIndex")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("TargetReps")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("TargetReps")
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("TargetRestSeconds")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TargetSets")
+                    b.Property<int?>("TargetSets")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TrainingPlanDayId")

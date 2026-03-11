@@ -1,48 +1,21 @@
-import { Injectable } from '@angular/core';
-import { DayLog, ExerciseSessionLog, LoggedSet } from '../models/logs.models';
-import { todayKey } from '../utils/training-math';
-
-const KEY = 'coach-tracker.dayLogs.v1';
-
-function readAll(): Record<string, DayLog> {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) return {};
-  try { return JSON.parse(raw) as Record<string, DayLog>; } catch { return {}; }
-}
-
-function writeAll(map: Record<string, DayLog>): void {
-  localStorage.setItem(KEY, JSON.stringify(map));
-}
+import { Injectable, signal } from '@angular/core';
+import { WorkoutsApiService } from './workouts-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class LogsStore {
-  getDay(date = todayKey()): DayLog {
-    const map = readAll();
-    return map[date] ?? { date, exercises: [] };
-  }
+  public sessions = signal<any[]>([]);
 
-  saveDay(day: DayLog): void {
-    const map = readAll();
-    map[day.date] = day;
-    writeAll(map);
-  }
+  constructor(private api: WorkoutsApiService) {}
 
-  addSet(date: string, exerciseName: string, set: LoggedSet): void {
-    const day = this.getDay(date);
-    const exIdx = day.exercises.findIndex(e => e.exerciseName.toLowerCase() === exerciseName.toLowerCase());
-    if (exIdx < 0) {
-      const ex: ExerciseSessionLog = { exerciseName, sets: [set] };
-      day.exercises = [ex, ...day.exercises];
-    } else {
-      const ex = day.exercises[exIdx];
-      const updated = { ...ex, sets: [set, ...ex.sets] };
-      day.exercises = day.exercises.map((e, i) => (i === exIdx ? updated : e));
-    }
-    this.saveDay(day);
-  }
+  listAllDays() { return this.sessions(); }
 
-  listAllDays(): DayLog[] {
-    const map = readAll();
-    return Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
+  addSet(date: string, exerciseName: string, data: { kg: number, reps: number, rir?: number, createdAt?: string }) {
+    const exerciseId = 1; // Temporary: logic to find ID by Name goes here later
+
+    // Explicitly type response and err as 'any' to satisfy strict compiler
+    this.api.logSet(exerciseId, data.kg, data.reps, data.rir ?? 0).subscribe({
+      next: (response: any) => console.log('Success!', response),
+      error: (err: any) => console.error('404 or Connection Error:', err)
+    });
   }
 }

@@ -7,7 +7,7 @@ public class TrainingPlanDay
     public TrainingPlan TrainingPlan { get; set; } = null!;
 
     public int DayOfWeek { get; set; }
-    public string Title { get; set; } = string.Empty;
+    public string Name { get; set; } = "";
 
-    public List<TrainingPlanItem> Items { get; set; } = [];
+    public List<TrainingPlanItem> Items { get; set; } = new();
 }

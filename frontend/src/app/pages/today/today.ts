@@ -114,7 +114,7 @@ export class TodayComponent implements OnInit, OnDestroy {
     this.logs.addSet(this.date, name, {
       kg: parsed.kg!,
       reps: Number(this.reps),
-      rir: this.rir === null ? undefined : Number(this.rir),
+      rir: this.rir ? Number(this.rir) : 0,
       createdAt: new Date().toISOString(),
     });
 

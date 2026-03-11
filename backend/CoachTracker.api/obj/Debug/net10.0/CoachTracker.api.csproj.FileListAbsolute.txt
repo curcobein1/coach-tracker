@@ -179,3 +179,4 @@ C:\Users\eodabasi\coach-tracker\backend\CoachTracker.Api\obj\Debug\net10.0\refin
 C:\Users\eodabasi\coach-tracker\backend\CoachTracker.Api\obj\Debug\net10.0\CoachTracker.api.pdb
 C:\Users\eodabasi\coach-tracker\backend\CoachTracker.Api\obj\Debug\net10.0\CoachTracker.api.genruntimeconfig.cache
 C:\Users\eodabasi\coach-tracker\backend\CoachTracker.Api\obj\Debug\net10.0\ref\CoachTracker.api.dll
+C:\Users\eodabasi\coach-tracker\backend\CoachTracker.api\obj\Debug\net10.0\CoachTracker.api.sourcelink.json

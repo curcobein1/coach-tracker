@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoachTracker.api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+60347ec508d162690641fe5fc1f93a13c13d3bc5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c6405f1aa657085260fdfc85be5b4a1bca4ec1ec")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoachTracker.api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoachTracker.api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

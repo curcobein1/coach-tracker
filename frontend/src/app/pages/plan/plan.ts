@@ -12,7 +12,7 @@ import { PlanStore, PlanDay } from '../../core/services/plan.store';
 })
 export class PlanComponent implements OnInit {
   plan;
-  selectedDayId: string;
+  selectedDayId: number;
   templates = [
     {
       kind: 'push' as const,
@@ -66,7 +66,7 @@ export class PlanComponent implements OnInit {
 
   constructor(private store: PlanStore) {
     this.plan = this.store.get();
-    this.selectedDayId = this.plan.days[0]?.id ?? 'mon';
+    this.selectedDayId = this.plan.days[0]?.id ?? 0;
   }
 
   ngOnInit(): void {
@@ -77,7 +77,7 @@ export class PlanComponent implements OnInit {
     return this.plan.days.find((d) => d.id === this.selectedDayId)!;
   }
 
-  selectDay(id: string) {
+  selectDay(id: number) {
     this.selectedDayId = id;
   }
 
@@ -104,17 +104,17 @@ export class PlanComponent implements OnInit {
     this.plan = this.store.get();
   }
 
-  remove(itemId: string) {
+  remove(itemId: number) {
     this.store.removeItem(this.selectedDayId, itemId);
     this.plan = this.store.get();
   }
 
-  moveUp(itemId: string) {
+  moveUp(itemId: number) {
     this.store.moveItem(this.selectedDayId, itemId, -1);
     this.plan = this.store.get();
   }
 
-  moveDown(itemId: string) {
+  moveDown(itemId: number) {
     this.store.moveItem(this.selectedDayId, itemId, 1);
     this.plan = this.store.get();
   }
@@ -122,10 +122,10 @@ export class PlanComponent implements OnInit {
   reset() {
     this.store.reset();
     this.plan = this.store.get();
-    this.selectedDayId = this.plan.days[0]?.id ?? 'mon';
+    this.selectedDayId = this.plan.days[0]?.id ?? 0;
   }
 
-  edit(itemId: string, patch: any) {
+  edit(itemId: number, patch: any) {
     this.store.updateItem(this.selectedDayId, itemId, patch);
     this.plan = this.store.get();
   }
