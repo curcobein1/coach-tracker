@@ -6,6 +6,8 @@ import {
   FoodSearchItem,
   FoodDetail,
 } from '../../core/services/food-api.service';
+import { NutritionStore } from '../../core/services/nutrition.store';
+import { UsualFood } from '../../core/models/nutrition.models';
 
 @Component({
   selector: 'app-nutrition',
@@ -17,6 +19,7 @@ import {
 export class NutritionComponent {
   private foodApi = inject(FoodApiService);
   private cdr = inject(ChangeDetectorRef);
+  private nutrition = inject(NutritionStore);
 
   query = '';
   results: FoodSearchItem[] = [];
@@ -26,6 +29,8 @@ export class NutritionComponent {
   isSearching = false;
   isLoadingDetail = false;
   error = '';
+
+  grams = 100;
 
   searchFoods() {
     const trimmed = this.query.trim();
@@ -72,6 +77,7 @@ export class NutritionComponent {
       next: (detail) => {
         this.selectedFood = { ...detail };
         this.isLoadingDetail = false;
+        this.grams = 100;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -96,6 +102,58 @@ export class NutritionComponent {
 
   trackByNutrientKey(_: number, item: { key: string }) {
     return item.key;
+  }
+
+  get isSelectedUsual(): boolean {
+    if (!this.selectedFood) return false;
+    const id = this.selectedFood.fdcId;
+    return this.nutrition.getUsuals().some((u: UsualFood) => u.fdcId === id);
+  }
+
+  addSelectedToToday(): void {
+    if (!this.selectedFood) return;
+    const g = Number(this.grams) || 0;
+    const s = this.selectedFood.summary;
+
+    const scale = (v?: number | null) => (v ?? 0) * (g / 100);
+
+    this.nutrition.addFood(
+      {
+        fdcId: this.selectedFood.fdcId,
+        name: this.selectedFood.description,
+        grams: g,
+        kcal: scale(s.calories ?? undefined),
+        p: scale(s.protein ?? undefined),
+        c: scale(s.carbs ?? undefined),
+        f: scale(s.fat ?? undefined),
+      },
+      undefined
+    );
+  }
+
+  toggleSelectedUsual(): void {
+    if (!this.selectedFood) return;
+    const id = this.selectedFood.fdcId;
+    const current = this.nutrition.getUsuals();
+
+    if (current.some((u) => u.fdcId === id)) {
+      this.nutrition.removeUsual(id);
+      return;
+    }
+
+    const s = this.selectedFood.summary;
+    const g = 100;
+    const scale = (v?: number | null) => (v ?? 0);
+
+    this.nutrition.addOrUpdateUsual({
+      fdcId: id,
+      name: this.selectedFood.description,
+      grams: g,
+      kcal: scale(s.calories ?? undefined),
+      p: scale(s.protein ?? undefined),
+      c: scale(s.carbs ?? undefined),
+      f: scale(s.fat ?? undefined),
+    });
   }
 }
 

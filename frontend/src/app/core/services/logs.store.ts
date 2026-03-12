@@ -9,13 +9,8 @@ export class LogsStore {
 
   listAllDays() { return this.sessions(); }
 
-  addSet(date: string, exerciseName: string, data: { kg: number, reps: number, rir?: number, createdAt?: string }) {
-    const exerciseId = 1; // Temporary: logic to find ID by Name goes here later
-
-    // Explicitly type response and err as 'any' to satisfy strict compiler
-    this.api.logSet(exerciseId, data.kg, data.reps, data.rir ?? 0).subscribe({
-      next: (response: any) => console.log('Success!', response),
-      error: (err: any) => console.error('404 or Connection Error:', err)
-    });
+  addSet(date: string, exerciseName: string, data: { kg: number; reps: number; rir?: number; createdAt?: string }) {
+    // Return observable so callers can react (e.g. refresh today workout)
+    return this.api.logSet(exerciseName, data.kg, data.reps, data.rir ?? 0);
   }
 }

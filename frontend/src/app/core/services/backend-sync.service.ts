@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class BackendSyncService {
-  private base = `${window.location.protocol}//${window.location.hostname}:5050/api`;
+  private base = `http://localhost:5106/api`;
 
   constructor(private http: HttpClient) {}
 

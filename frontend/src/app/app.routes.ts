@@ -1,12 +1,10 @@
 import { Routes } from '@angular/router';
-import {LibraryComponent} from './pages/library/library';
 import { TodayComponent } from './pages/today/today';
 import { PlanComponent } from './pages/plan/plan';
 import { NutritionComponent} from './pages/nutrition/nutrition';
 import { SettingsComponent } from './pages/settings/settings';
 
 export const routes: Routes = [
-  { path:'library', component: LibraryComponent, title: 'Library' },
   { path: '', pathMatch: 'full', redirectTo: 'today' },
   { path: 'today', component: TodayComponent, title: 'Today' },
   { path: 'plan', component: PlanComponent, title: 'Plan' },

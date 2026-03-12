@@ -68,7 +68,16 @@
 
       @if (selectedFood) {
       <div class="detail-card">
-        <h4>{{ selectedFood.description }}</h4>
+        <div class="detail-header-row">
+          <h4>{{ selectedFood.description }}</h4>
+          <button
+            type="button"
+            class="star-btn"
+            (click)="toggleSelectedUsual()"
+          >
+            {{ isSelectedUsual ? '★' : '☆' }}
+          </button>
+        </div>
 
         @if (selectedFood.foodCategory) {
         <div class="food-subtitle">{{ selectedFood.foodCategory }}</div>
@@ -82,6 +91,14 @@
           <div>Fiber: {{ selectedFood.summary.fiber ?? '-' }} g</div>
           <div>Sugar: {{ selectedFood.summary.sugar ?? '-' }} g</div>
           <div>Sodium: {{ selectedFood.summary.sodium ?? '-' }} mg</div>
+        </div>
+
+        <div class="log-controls">
+          <label>Grams:</label>
+          <input type="number" [(ngModel)]="grams" min="1" />
+          <button type="button" (click)="addSelectedToToday()">
+            Add to today
+          </button>
         </div>
 
         @if (selectedFood.micronutrients.vitamins.length > 0) {

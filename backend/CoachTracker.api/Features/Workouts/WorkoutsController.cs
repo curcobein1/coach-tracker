@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoachTracker.Api.Data;
+using CoachTracker.Api.Features.Exercises;
 
 namespace CoachTracker.Api.Features.Workouts;
 
@@ -23,6 +24,8 @@ public class WorkoutsController : ControllerBase
         var session = await _db.WorkoutSessions
             .Include(s => s.ExerciseLogs)
                 .ThenInclude(el => el.Sets)
+            .Include(s => s.ExerciseLogs)
+                .ThenInclude(el => el.Exercise)
             .FirstOrDefaultAsync(s => s.Date == today);
 
         if (session == null)
@@ -43,6 +46,7 @@ public class WorkoutsController : ControllerBase
             {
                 exerciseLogId = el.Id,
                 exerciseId = el.ExerciseId,
+                exerciseName = el.Exercise != null ? el.Exercise.Name : null,
                 sets = el.Sets
                     .OrderBy(s => s.SetNumber)
                     .Select(s => new
@@ -64,6 +68,27 @@ public class WorkoutsController : ControllerBase
     [HttpPost("log-set")]
     public async Task<IActionResult> LogSet([FromBody] LogSetDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.ExerciseName))
+        {
+            return BadRequest(new { message = "ExerciseName is required." });
+        }
+
+        var trimmedName = dto.ExerciseName.Trim();
+        var exercise = await _db.Exercises
+            .FirstOrDefaultAsync(e => e.Name.ToLower() == trimmedName.ToLower());
+
+        if (exercise == null)
+        {
+            exercise = new Exercise
+            {
+                Name = trimmedName,
+                Group = "Unknown",
+                Category = "UserLogged"
+            };
+            _db.Exercises.Add(exercise);
+            await _db.SaveChangesAsync();
+        }
+
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         var session = await _db.WorkoutSessions
@@ -86,14 +111,14 @@ public class WorkoutsController : ControllerBase
             .Include(e => e.Sets)
             .FirstOrDefaultAsync(e =>
                 e.WorkoutSessionId == session.Id &&
-                e.ExerciseId == dto.ExerciseId);
+                e.ExerciseId == exercise.Id);
 
         if (exerciseLog == null)
         {
             exerciseLog = new WorkoutExerciseLog
             {
                 WorkoutSessionId = session.Id,
-                ExerciseId = dto.ExerciseId,
+                ExerciseId = exercise.Id,
             };
 
             _db.WorkoutExerciseLogs.Add(exerciseLog);
@@ -128,5 +153,38 @@ public class WorkoutsController : ControllerBase
             reps = setLog.Reps,
             rir = setLog.Rir
         });
+    }
+
+    [HttpDelete("sets/{setId:int}")]
+    public async Task<IActionResult> DeleteSet(int setId)
+    {
+        var set = await _db.WorkoutSetLogs
+            .Include(s => s.WorkoutExerciseLog)
+            .ThenInclude(e => e.Sets)
+            .Include(s => s.WorkoutExerciseLog.WorkoutSession)
+            .ThenInclude(ws => ws.ExerciseLogs)
+            .FirstOrDefaultAsync(s => s.Id == setId);
+
+        if (set == null) return NotFound();
+
+        var exerciseLog = set.WorkoutExerciseLog;
+        var session = exerciseLog.WorkoutSession;
+
+        _db.WorkoutSetLogs.Remove(set);
+
+        // If no more sets for this exercise, remove exercise log
+        if (exerciseLog.Sets.Count <= 1)
+        {
+            _db.WorkoutExerciseLogs.Remove(exerciseLog);
+        }
+
+        // If session has no more exercise logs, remove the session
+        if (session.ExerciseLogs.Count <= 1 && exerciseLog.Sets.Count <= 1)
+        {
+            _db.WorkoutSessions.Remove(session);
+        }
+
+        await _db.SaveChangesAsync();
+        return Ok(new { ok = true });
     }
 }

@@ -30,6 +30,61 @@
     </div>
   </div>
 
+  <!-- Logged workout for today -->
+  <div class="card">
+    <div class="row" style="justify-content:space-between; align-items:center;">
+      <div class="title">Today sets (from backend)</div>
+      <div class="sub">{{ date }}</div>
+    </div>
+
+    <div class="sub" style="margin-top:6px; opacity:.8;">
+      Recent sets logged via the Log set form above.
+    </div>
+
+    <div *ngIf="!todayWorkout || !todayWorkout.exercises || todayWorkout.exercises.length === 0" class="sub" style="margin-top:8px;">
+      No sets logged yet.
+    </div>
+
+    <table
+      *ngIf="todayWorkout && todayWorkout.exercises && todayWorkout.exercises.length > 0"
+      style="width:100%; margin-top:8px; font-size:13px; border-collapse:collapse;"
+    >
+      <thead>
+        <tr style="text-align:left; border-bottom:1px solid #333;">
+          <th style="padding:4px 0;">Exercise</th>
+          <th style="padding:4px 0;">Set</th>
+          <th style="padding:4px 0;">kg</th>
+          <th style="padding:4px 0;">Reps</th>
+          <th style="padding:4px 0;">RIR</th>
+          <th style="padding:4px 0; width:40px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let ex of todayWorkout.exercises">
+          <tr *ngFor="let s of ex.sets">
+            <td style="padding:4px 0; white-space:nowrap;">
+              {{ ex.exerciseName || ('#' + ex.exerciseId) }}
+            </td>
+            <td style="padding:4px 0;">{{ s.setNumber }}</td>
+            <td style="padding:4px 0;">{{ s.weight }}</td>
+            <td style="padding:4px 0;">{{ s.reps }}</td>
+            <td style="padding:4px 0;">{{ s.rir }}</td>
+            <td style="padding:4px 0;">
+              <button
+                type="button"
+                (click)="deleteSetById(s.id)"
+                style="border:none; background:transparent; color:#f66; cursor:pointer; font-size:13px; padding:0 4px;"
+                title="Remove set"
+              >
+                ×
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
   <div class="exercise-grid">
     <div class="exercise-card" *ngFor="let s of stats.list()">
       <div class="row">
@@ -45,12 +100,12 @@
     </div>
   </div>
 
-      <!-- Bottom half: diet for today -->
-      <div class="card" style="margin-top:20px;">
-        <div class="row" style="justify-content:space-between; align-items:center;">
-          <div class="title">Diet today</div>
-          <div class="sub">{{ date }}</div>
-        </div>
+  <!-- Bottom half: diet for today -->
+  <div class="card" style="margin-top:20px;">
+    <div class="row" style="justify-content:space-between; align-items:center;">
+      <div class="title">Diet today</div>
+      <div class="sub">{{ date }}</div>
+    </div>
 
     <div *ngIf="dietDay === null || dietDay.foods.length === 0" class="sub" style="margin-top:8px;">
       No foods logged yet.
@@ -98,7 +153,4 @@
         </tr>
       </tbody>
     </table>
-      </div>
-    </div>
   </div>
-</div>

@@ -1,88 +1,114 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { DayNutritionLog, LoggedFood, UsualFood } from '../models/nutrition.models';
 import { todayKey } from '../utils/training-math';
-
-const DAY_KEY = 'coach-tracker.nutrition.days.v1';
-const USUALS_KEY = 'coach-tracker.nutrition.usuals.v1';
-
-function readDays(): Record<string, DayNutritionLog> {
-  const raw = localStorage.getItem(DAY_KEY);
-  if (!raw) return {};
-  try {
-    return JSON.parse(raw) as Record<string, DayNutritionLog>;
-  } catch {
-    return {};
-  }
-}
-
-function writeDays(map: Record<string, DayNutritionLog>): void {
-  localStorage.setItem(DAY_KEY, JSON.stringify(map));
-}
-
-function readUsuals(): UsualFood[] {
-  const raw = localStorage.getItem(USUALS_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as UsualFood[];
-  } catch {
-    return [];
-  }
-}
-
-function writeUsuals(list: UsualFood[]): void {
-  localStorage.setItem(USUALS_KEY, JSON.stringify(list));
-}
+import { NutritionApiService } from './nutrition-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class NutritionStore {
-  getDay(date = todayKey()): DayNutritionLog {
-    const map = readDays();
-    return map[date] ?? { date, foods: [] };
+  private dayCache = new Map<string, DayNutritionLog>();
+
+  public usuals = signal<UsualFood[]>([]);
+
+  constructor(private api: NutritionApiService) {
+    this.refreshUsuals();
   }
 
-  saveDay(day: DayNutritionLog): void {
-    const map = readDays();
-    map[day.date] = day;
-    writeDays(map);
+  getDay(date = todayKey()): DayNutritionLog {
+    // return cached, kick off refresh
+    const cached = this.dayCache.get(date);
+    if (!cached) {
+      const empty = { date, foods: [] as any[] };
+      this.dayCache.set(date, empty);
+      this.refreshDay(date);
+      return empty;
+    }
+    return cached;
+  }
+
+  private refreshDay(date: string): void {
+    this.api.getDay(date).subscribe({
+      next: (r) => {
+        const foods: LoggedFood[] = (r.foods ?? []).map((f) => ({
+          fdcId: f.fdcId,
+          name: f.name,
+          grams: f.grams,
+          kcal: f.kcal,
+          p: f.p,
+          c: f.c,
+          f: f.f,
+          at: f.id, // map backend id into 'at' for existing UI delete calls
+        }));
+        this.dayCache.set(date, { date, foods });
+        document.dispatchEvent(new CustomEvent('nutrition:day-updated', { detail: { date } }));
+      },
+      error: (e) => console.error('Failed to load nutrition day', e),
+    });
   }
 
   addFood(food: Omit<LoggedFood, 'at'>, date = todayKey()): void {
-    const day = this.getDay(date);
-    const logged: LoggedFood = {
-      ...food,
-      at: new Date().toISOString(),
-    };
-    day.foods = [logged, ...(day.foods ?? [])];
-    this.saveDay(day);
-    // fire-and-forget event so Today page can react if desired
-    document.dispatchEvent(new CustomEvent('nutrition:day-updated', { detail: { date: day.date } }));
+    this.api.addFood(date, {
+      fdcId: food.fdcId,
+      name: food.name,
+      grams: food.grams,
+      kcal: food.kcal,
+      p: food.p,
+      c: food.c,
+      f: food.f,
+    }).subscribe({
+      next: () => this.refreshDay(date),
+      error: (e) => console.error('Failed to add food', e),
+    });
   }
 
   removeFood(date: string, at: string): void {
-    const day = this.getDay(date);
-    day.foods = (day.foods ?? []).filter(f => f.at !== at);
-    this.saveDay(day);
-    document.dispatchEvent(new CustomEvent('nutrition:day-updated', { detail: { date: day.date } }));
+    // 'at' is mapped to backend Guid id string
+    this.api.deleteFood(date, at).subscribe({
+      next: () => this.refreshDay(date),
+      error: (e) => console.error('Failed to delete food', e),
+    });
   }
 
   getUsuals(): UsualFood[] {
-    return readUsuals();
+    return this.usuals();
+  }
+
+  refreshUsuals(): void {
+    this.api.getUsuals().subscribe({
+      next: (r) => {
+        this.usuals.set((r.usuals ?? []).map((u) => ({
+          fdcId: u.fdcId,
+          name: u.name,
+          grams: u.grams,
+          kcal: u.kcal,
+          p: u.p,
+          c: u.c,
+          f: u.f,
+        })));
+      },
+      error: (e) => console.error('Failed to load usuals', e),
+    });
   }
 
   addOrUpdateUsual(food: UsualFood): void {
-    const list = readUsuals();
-    const idx = list.findIndex((u) => u.fdcId === food.fdcId);
-    if (idx >= 0) {
-      const updated = list.map((u, i) => (i === idx ? food : u));
-      writeUsuals(updated);
-      return;
-    }
-    writeUsuals([food, ...list]);
+    this.api.upsertUsual(food.fdcId, {
+      fdcId: food.fdcId,
+      name: food.name,
+      grams: food.grams,
+      kcal: food.kcal,
+      p: food.p,
+      c: food.c,
+      f: food.f,
+    }).subscribe({
+      next: () => this.refreshUsuals(),
+      error: (e) => console.error('Failed to save usual', e),
+    });
   }
 
   removeUsual(fdcId: number): void {
-    const list = readUsuals();
-    writeUsuals(list.filter((u) => u.fdcId !== fdcId));
+    this.api.deleteUsual(fdcId).subscribe({
+      next: () => this.refreshUsuals(),
+      error: (e) => console.error('Failed to delete usual', e),
+    });
   }
 }
 

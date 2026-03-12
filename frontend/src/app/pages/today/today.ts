@@ -38,6 +38,9 @@ export class TodayComponent implements OnInit, OnDestroy {
   private usStyleEl: HTMLStyleElement | null = null;
   private usBrandingInterval: number | null = null;
 
+  // today workout snapshot
+  todayWorkout: any | null = null;
+
   constructor(
     private workoutsApi: WorkoutsApiService,
     public stats: ExerciseStatsStore,
@@ -52,9 +55,7 @@ export class TodayComponent implements OnInit, OnDestroy {
     this.refreshDiet();
     document.addEventListener('nutrition:day-updated', this.onNutritionUpdate);
     this.initBackgroundAnimation();
-    this.workoutsApi.getTodayWorkout().subscribe((data: any) => {
-          console.log(data);
-          });
+    this.refreshTodayWorkout();
   }
 
   private refreshDiet(): void {
@@ -116,13 +117,37 @@ export class TodayComponent implements OnInit, OnDestroy {
       reps: Number(this.reps),
       rir: this.rir ? Number(this.rir) : 0,
       createdAt: new Date().toISOString(),
+    }).subscribe({
+      next: () => {
+        this.reps = 0;
+        this.refreshTodayWorkout();
+      },
+      error: (e) => {
+        console.error('Failed to log set', e);
+      },
     });
-
-    this.reps = 0;
   }
 
   snap(name: string) {
     return this.analytics.snapshot(name, new Date());
+  }
+
+  deleteSetById(setId: number): void {
+    this.workoutsApi.deleteSet(setId).subscribe({
+      next: () => {
+        this.refreshTodayWorkout();
+      },
+      error: (e) => console.error('Failed to delete set', e),
+    });
+  }
+
+  private refreshTodayWorkout(): void {
+    this.workoutsApi.getTodayWorkout().subscribe({
+      next: (data: any) => {
+        this.todayWorkout = data;
+      },
+      error: (e) => console.error('Failed to load today workout', e),
+    });
   }
 
   private initBackgroundAnimation(): void {

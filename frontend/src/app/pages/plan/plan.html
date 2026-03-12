@@ -13,8 +13,13 @@
         <div class="peek" *ngFor="let ex of t.preview">{{ ex }}</div>
       </div>
 
-      <button class="btn ghost" type="button" (click)="applyTemplate(t.kind)">
-        Apply to {{ selectedDay.title }}
+      <button
+        class="btn ghost"
+        type="button"
+        *ngIf="selectedDay as day"
+        (click)="applyTemplate(t.kind)"
+      >
+        Apply to {{ day.title }}
       </button>
     </div>
   </div>
@@ -32,10 +37,10 @@
     </button>
   </div>
 
-  <div class="card">
+  <div class="card" *ngIf="selectedDay as day">
     <div class="row">
       <div class="label">Editing:</div>
-      <div class="value">{{ selectedDay.title }}</div>
+      <div class="value">{{ day.title }}</div>
     </div>
 
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
@@ -74,11 +79,11 @@
       </select>
     </div>
 
-    <div class="list" *ngIf="selectedDay.items.length === 0">
+    <div class="list" *ngIf="day.items.length === 0">
       <div class="muted">No items yet. Add your first exercise above.</div>
     </div>
 
-    <div class="list" *ngIf="selectedDay.items.length > 0">
+    <div class="list" *ngIf="day.items.length > 0">
       <div
         class="item"
         *ngFor="let it of filteredItems"

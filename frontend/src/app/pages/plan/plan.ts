@@ -52,8 +52,10 @@ export class PlanComponent implements OnInit {
   ];
 
   get filteredItems() {
-    if (this.filterGroup === 'All') return this.selectedDay.items;
-    return this.selectedDay.items.filter((it) => it.group === this.filterGroup);
+    const day = this.selectedDay;
+    if (!day) return [];
+    if (this.filterGroup === 'All') return day.items;
+    return day.items.filter((it) => it.group === this.filterGroup);
   }
 
   exerciseName = '';
@@ -70,11 +72,19 @@ export class PlanComponent implements OnInit {
   }
 
   ngOnInit(): void {
-      this.store.loadActivePlan();
-    }
+    this.store.loadActivePlan(() => {
+      this.plan = this.store.get();
+      this.selectedDayId = this.plan.days[0]?.id ?? 0;
+    });
+  }
 
-  get selectedDay(): PlanDay {
-    return this.plan.days.find((d) => d.id === this.selectedDayId)!;
+  private saveActivePlan(): void {
+    this.store.saveActivePlan();
+  }
+
+  get selectedDay(): PlanDay | null {
+    if (!this.plan || !this.plan.days) return null;
+    return this.plan.days.find((d: any) => d.id === this.selectedDayId) ?? null;
   }
 
   selectDay(id: number) {
@@ -102,40 +112,49 @@ export class PlanComponent implements OnInit {
     this.exerciseName = '';
     this.tagsText = '';
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 
   remove(itemId: number) {
     this.store.removeItem(this.selectedDayId, itemId);
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 
   moveUp(itemId: number) {
     this.store.moveItem(this.selectedDayId, itemId, -1);
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 
   moveDown(itemId: number) {
     this.store.moveItem(this.selectedDayId, itemId, 1);
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 
   reset() {
     this.store.reset();
     this.plan = this.store.get();
     this.selectedDayId = this.plan.days[0]?.id ?? 0;
+    this.saveActivePlan();
   }
 
   edit(itemId: number, patch: any) {
     this.store.updateItem(this.selectedDayId, itemId, patch);
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 
   clearDay() {
-    const ids = [...this.selectedDay.items.map((it) => it.id)];
+    const day = this.selectedDay;
+    if (!day) return;
+    const ids = [...day.items.map((it) => it.id)];
     for (const id of ids) {
       this.store.removeItem(this.selectedDayId, id);
     }
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 
   applyTemplate(kind: 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'torso' | 'limbs') {
@@ -218,5 +237,6 @@ export class PlanComponent implements OnInit {
     }
 
     this.plan = this.store.get();
+    this.saveActivePlan();
   }
 }

@@ -53,10 +53,22 @@ export class PlanStore {
     return structuredClone(this.state);
   }
 
-  loadActivePlan(): void {
+  loadActivePlan(done?: () => void): void {
     this.api.getActivePlan().subscribe({
       next: (plan) => {
         this.state = this.mapFromDto(plan);
+        if (this.state.days.length === 0) {
+          this.state.days = [
+            { id: 1, dayOfWeek: 1, name: 'Monday',    title: 'Monday',    items: [] },
+            { id: 2, dayOfWeek: 2, name: 'Tuesday',   title: 'Tuesday',   items: [] },
+            { id: 3, dayOfWeek: 3, name: 'Wednesday', title: 'Wednesday', items: [] },
+            { id: 4, dayOfWeek: 4, name: 'Thursday',  title: 'Thursday',  items: [] },
+            { id: 5, dayOfWeek: 5, name: 'Friday',    title: 'Friday',    items: [] },
+            { id: 6, dayOfWeek: 6, name: 'Saturday',  title: 'Saturday',  items: [] },
+            { id: 7, dayOfWeek: 7, name: 'Sunday',    title: 'Sunday',    items: [] },
+          ];
+        }
+        if (done) done();
       },
       error: (err) => {
         console.error('Failed to load active plan', err);
