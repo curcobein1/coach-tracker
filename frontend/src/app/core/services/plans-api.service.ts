@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface TrainingPlanItemDto {
-     id: number;
-      exerciseId: number;
-      orderIndex: number;
-      targetSets: number;
-      targetReps?: string | null;
-      targetRestSeconds?: number | null;
-      notes?: string | null;
+  id: number;
+  exerciseId: number;
+  exerciseName?: string | null;
+  orderIndex: number;
+  targetSets: number;
+  targetReps?: string | null;
+  targetRestSeconds?: number | null;
+  notes?: string | null;
 }
 
 export interface TrainingPlanDayDto {

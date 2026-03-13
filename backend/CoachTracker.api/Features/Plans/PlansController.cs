@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoachTracker.Api.Data;
+using CoachTracker.Api.Features.Exercises;
 
 namespace CoachTracker.Api.Features.Plans;
 
@@ -20,7 +21,8 @@ public class PlansController : ControllerBase
     {
         var plan = await _db.TrainingPlans
             .Include(p => p.Days)
-                .ThenInclude(d => d.Items)
+            .ThenInclude(d => d.Items)
+                .ThenInclude(i => i.Exercise)
             .FirstOrDefaultAsync(p => p.IsActive);
 
         if (plan == null)
@@ -57,6 +59,7 @@ public class PlansController : ControllerBase
                     {
                         Id = i.Id,
                         ExerciseId = i.ExerciseId,
+                        ExerciseName = i.Exercise?.Name ?? string.Empty,
                         OrderIndex= i.OrderIndex,
                         TargetSets = i.TargetSets,
                         TargetReps = i.TargetReps,
@@ -95,21 +98,70 @@ public class PlansController : ControllerBase
         _db.TrainingPlanItems.RemoveRange(plan.Days.SelectMany(d => d.Items));
         _db.TrainingPlanDays.RemoveRange(plan.Days);
 
-        plan.Days = dto.Days.Select(d => new TrainingPlanDay
+        // Rebuild from DTO, resolving/creating Exercises from ExerciseName so
+        // template-based and free-text plan items persist correctly.
+        var newDays = new List<TrainingPlanDay>();
+
+        foreach (var dayDto in dto.Days)
         {
-            DayOfWeek = d.DayOfWeek,
-            Name = d.Name,
-            Items = d.Items.Select(i => new TrainingPlanItem
+            var day = new TrainingPlanDay
             {
-                Id = i.Id,
-                ExerciseId = i.ExerciseId,
-                OrderIndex= i.OrderIndex,
-                TargetSets = i.TargetSets,
-                TargetReps = i.TargetReps,
-                TargetRestSeconds = i.TargetRestSeconds,
-                Notes =i.Notes
-            }).ToList()
-        }).ToList();
+                DayOfWeek = dayDto.DayOfWeek,
+                Name = dayDto.Name,
+                Items = new List<TrainingPlanItem>()
+            };
+
+            foreach (var itemDto in dayDto.Items)
+            {
+                // Resolve or create Exercise based on ExerciseName / ExerciseId.
+                var exerciseName = (itemDto.ExerciseName ?? string.Empty).Trim();
+
+                Exercise? exercise = null;
+
+                if (itemDto.ExerciseId != 0)
+                {
+                    exercise = await _db.Exercises.FirstOrDefaultAsync(e => e.Id == itemDto.ExerciseId);
+                }
+
+                if (exercise is null)
+                {
+                    if (string.IsNullOrWhiteSpace(exerciseName))
+                    {
+                        exerciseName = $"Planned Exercise #{itemDto.OrderIndex + 1}";
+                    }
+
+                    var normalized = exerciseName.ToLower();
+
+                    exercise = await _db.Exercises
+                        .FirstOrDefaultAsync(e => e.Name.ToLower() == normalized);
+
+                    if (exercise is null)
+                    {
+                        exercise = new Exercise
+                        {
+                            Name = exerciseName,
+                            Group = "Unknown",
+                            Category = "Plan"
+                        };
+                        _db.Exercises.Add(exercise);
+                    }
+                }
+
+                day.Items.Add(new TrainingPlanItem
+                {
+                    Exercise = exercise,
+                    OrderIndex = itemDto.OrderIndex,
+                    TargetSets = itemDto.TargetSets,
+                    TargetReps = itemDto.TargetReps,
+                    TargetRestSeconds = itemDto.TargetRestSeconds,
+                    Notes = itemDto.Notes
+                });
+            }
+
+            newDays.Add(day);
+        }
+
+        plan.Days = newDays;
 
         await _db.SaveChangesAsync();
 

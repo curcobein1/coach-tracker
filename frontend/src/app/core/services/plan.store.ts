@@ -192,7 +192,9 @@ export class PlanStore {
         targetRestSeconds: i.targetRestSeconds ?? null,
         notes: i.notes ?? null,
 
-        exerciseName: `Exercise ${i.exerciseId}`,
+        exerciseName: i.exerciseName && i.exerciseName.trim().length > 0
+          ? i.exerciseName
+          : `Exercise ${i.exerciseId}`,
         sets: i.targetSets,
         repRange: i.targetReps ?? null,
         rir: null,
@@ -231,6 +233,7 @@ export class PlanStore {
         items: d.items.map((i) => ({
           id: i.id,
           exerciseId: i.exerciseId,
+          exerciseName: i.exerciseName,
           orderIndex: i.orderIndex,
           targetSets: i.targetSets ?? i.sets,
           targetReps: i.targetReps ?? i.repRange ?? null,

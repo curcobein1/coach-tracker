@@ -19,9 +19,10 @@ public class TrainingPlanItemDto
 {
     public int Id { get; set; }
     public int ExerciseId { get; set; }
+    public string ExerciseName { get; set; } = "";
     public int OrderIndex { get; set; }
     public int TargetSets { get; set; }
     public int? TargetReps { get; set; }
     public int? TargetRestSeconds { get; set; }
-    public string? Notes {get; set;}
+    public string? Notes { get; set; }
 }
