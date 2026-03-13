@@ -25,7 +25,7 @@
       <thead>
         <tr style="text-align:left; border-bottom:1px solid #333;">
           <th style="padding:4px 0;">#</th>
-          <th style="padding:4px 0;">Exercise (id)</th>
+          <th style="padding:4px 0;">Exercise</th>
           <th style="padding:4px 0;">Target sets</th>
           <th style="padding:4px 0;">Target reps</th>
         </tr>
@@ -33,7 +33,7 @@
       <tbody>
         <tr *ngFor="let it of todayPlanDay!.items; let idx = index" style="border-bottom:1px solid rgba(255,255,255,0.04);">
           <td style="padding:4px 0;">{{ idx + 1 }}</td>
-          <td style="padding:4px 0;">Exercise {{ it.exerciseId }}</td>
+          <td style="padding:4px 0;">{{ it.exerciseName || ('#' + it.exerciseId) }}</td>
           <td style="padding:4px 0;">{{ it.targetSets }}</td>
           <td style="padding:4px 0;">{{ it.targetReps || '-' }}</td>
         </tr>

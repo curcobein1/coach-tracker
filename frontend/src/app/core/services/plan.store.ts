@@ -236,7 +236,10 @@ export class PlanStore {
           exerciseName: i.exerciseName,
           orderIndex: i.orderIndex,
           targetSets: i.targetSets ?? i.sets,
-          targetReps: i.targetReps ?? i.repRange ?? null,
+          // Backend expects numeric reps (int?). Our UI uses string ranges like "6-10",
+          // so we currently persist reps only in the UI fields and leave TargetReps null
+          // to avoid model-binding errors.
+          targetReps: null,
           targetRestSeconds: i.targetRestSeconds ?? null,
           notes: i.notes ?? null
         }))

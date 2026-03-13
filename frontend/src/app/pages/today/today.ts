@@ -34,10 +34,6 @@ export class TodayComponent implements OnInit, OnDestroy {
   dietDay: DayNutritionLog | null = null;
   dietTotals = { grams: 0, kcal: 0, p: 0, c: 0, f: 0 };
 
-  // background animation (UnicornStudio) wiring
-  private usEmbedScriptEl: HTMLScriptElement | null = null;
-  private usStyleEl: HTMLStyleElement | null = null;
-  private usBrandingInterval: number | null = null;
 
   // today workout snapshot
   todayWorkout: any | null = null;
@@ -59,7 +55,6 @@ export class TodayComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.refreshDiet();
     document.addEventListener('nutrition:day-updated', this.onNutritionUpdate);
-    this.initBackgroundAnimation();
     this.refreshTodayWorkout();
     this.loadTodayPlan();
   }
@@ -87,7 +82,6 @@ export class TodayComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     document.removeEventListener('nutrition:day-updated', this.onNutritionUpdate);
-    this.teardownBackgroundAnimation();
   }
 
   deleteFood(f: LoggedFood): void {
@@ -166,135 +160,8 @@ export class TodayComponent implements OnInit, OnDestroy {
       error: (e) => console.error('Failed to load today plan', e),
     });
   }
-
-  private initBackgroundAnimation(): void {
-    // Inject UnicornStudio loader script (idempotent)
-    const embedScript = document.createElement('script');
-    embedScript.type = 'text/javascript';
-    embedScript.textContent = `
-      !function(){
-        if(!window.UnicornStudio){
-          window.UnicornStudio={isInitialized:!1};
-          var i=document.createElement("script");
-          i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.33/dist/unicornStudio.umd.js";
-          i.onload=function(){
-            window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)
-          };
-          (document.head || document.body).appendChild(i)
-        }
-      }();
-    `;
-    document.head.appendChild(embedScript);
-    this.usEmbedScriptEl = embedScript;
-
-    // CSS to crop canvas + hide branding
-    const style = document.createElement('style');
-    style.textContent = `
-      [data-us-project] {
-        position: relative !important;
-        overflow: hidden !important;
-      }
-
-      [data-us-project] canvas {
-        clip-path: inset(0 0 10% 0) !important;
-      }
-
-      [data-us-project] * {
-        pointer-events: none !important;
-      }
-
-      [data-us-project] a[href*="unicorn"],
-      [data-us-project] button[title*="unicorn"],
-      [data-us-project] div[title*="Made with"],
-      [data-us-project] .unicorn-brand,
-      [data-us-project] [class*="brand"],
-      [data-us-project] [class*="credit"],
-      [data-us-project] [class*="watermark"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        position: absolute !important;
-        left: -9999px !important;
-        top: -9999px !important;
-      }
-    `;
-    document.head.appendChild(style);
-    this.usStyleEl = style;
-
-    const hideBranding = () => {
-      const selectors = [
-        '[data-us-project]',
-        '[data-us-project="OMzqyUv6M3kSnv0JeAtC"]',
-        '.unicorn-studio-container',
-        'canvas[aria-label*="Unicorn"]',
-      ];
-
-      selectors.forEach((selector) => {
-        const containers = document.querySelectorAll(selector);
-        containers.forEach((container) => {
-          const allElements = container.querySelectorAll('*');
-          allElements.forEach((el) => {
-            const text = (el.textContent || '').toLowerCase();
-            const title = (el.getAttribute('title') || '').toLowerCase();
-            const href = (el.getAttribute('href') || '').toLowerCase();
-
-            if (
-              text.includes('made with') ||
-              text.includes('unicorn') ||
-              title.includes('made with') ||
-              title.includes('unicorn') ||
-              href.includes('unicorn.studio')
-            ) {
-              (el as HTMLElement).style.display = 'none';
-              (el as HTMLElement).style.visibility = 'hidden';
-              (el as HTMLElement).style.opacity = '0';
-              (el as HTMLElement).style.pointerEvents = 'none';
-              (el as HTMLElement).style.position = 'absolute';
-              (el as HTMLElement).style.left = '-9999px';
-              (el as HTMLElement).style.top = '-9999px';
-              try {
-                el.remove();
-              } catch {
-                // ignore
-              }
-            }
-          });
-        });
-      });
-    };
-
-    hideBranding();
-    this.usBrandingInterval = window.setInterval(hideBranding, 50);
-    window.setTimeout(hideBranding, 500);
-    window.setTimeout(hideBranding, 1000);
-    window.setTimeout(hideBranding, 2000);
-    window.setTimeout(hideBranding, 5000);
-    window.setTimeout(hideBranding, 10000);
-  }
-
-  private teardownBackgroundAnimation(): void {
-    if (this.usBrandingInterval !== null) {
-      clearInterval(this.usBrandingInterval);
-      this.usBrandingInterval = null;
-    }
-    if (this.usEmbedScriptEl) {
-      try {
-        document.head.removeChild(this.usEmbedScriptEl);
-      } catch {
-        // ignore
-      }
-      this.usEmbedScriptEl = null;
-    }
-    if (this.usStyleEl) {
-      try {
-        document.head.removeChild(this.usStyleEl);
-      } catch {
-        // ignore
-      }
-      this.usStyleEl = null;
-    }
-  }
 }
+
 
 
 
