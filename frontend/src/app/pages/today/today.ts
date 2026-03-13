@@ -7,10 +7,11 @@ import { LogsStore } from '../../core/services/logs.store';
 import { ExerciseAnalyticsService } from '../../core/services/exercise-analytics.service';
 import { NutritionStore } from '../../core/services/nutrition.store';
 import { DayNutritionLog, LoggedFood } from '../../core/models/nutrition.models';
-import { todayKey } from '../../core/utils/training-math';
+import { getDayOfWeek, todayKey } from '../../core/utils/training-math';
 import { parseKgInput } from '../../core/utils/weight-parser';
 import {SHARED_IMPORTS} from '../../shared/shared-imports';
 import { WorkoutsApiService } from '../../core/services/workouts-api.service';
+import { PlansApiService, TrainingPlanDayDto } from '../../core/services/plans-api.service';
 
 @Component({
   imports: SHARED_IMPORTS,
@@ -41,8 +42,12 @@ export class TodayComponent implements OnInit, OnDestroy {
   // today workout snapshot
   todayWorkout: any | null = null;
 
+  // today's planned split (from active plan in backend)
+  todayPlanDay: TrainingPlanDayDto | null = null;
+
   constructor(
     private workoutsApi: WorkoutsApiService,
+    private plansApi: PlansApiService,
     public stats: ExerciseStatsStore,
     private logs: LogsStore,
     public analytics: ExerciseAnalyticsService,
@@ -56,6 +61,7 @@ export class TodayComponent implements OnInit, OnDestroy {
     document.addEventListener('nutrition:day-updated', this.onNutritionUpdate);
     this.initBackgroundAnimation();
     this.refreshTodayWorkout();
+    this.loadTodayPlan();
   }
 
   private refreshDiet(): void {
@@ -147,6 +153,17 @@ export class TodayComponent implements OnInit, OnDestroy {
         this.todayWorkout = data;
       },
       error: (e) => console.error('Failed to load today workout', e),
+    });
+  }
+
+  private loadTodayPlan(): void {
+    const planDayOfWeek = getDayOfWeek(new Date());
+
+    this.plansApi.getActivePlan().subscribe({
+      next: (plan) => {
+        this.todayPlanDay = plan.days.find((d) => d.dayOfWeek === planDayOfWeek) ?? null;
+      },
+      error: (e) => console.error('Failed to load today plan', e),
     });
   }
 

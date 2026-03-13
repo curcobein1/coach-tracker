@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlanStore, PlanDay } from '../../core/services/plan.store';
+import { getDayOfWeek } from '../../core/utils/training-math';
 
 @Component({
   selector: 'app-plan',
@@ -12,7 +13,8 @@ import { PlanStore, PlanDay } from '../../core/services/plan.store';
 })
 export class PlanComponent implements OnInit {
   plan;
-  selectedDayId: number;
+  /** 1 = Monday, 7 = Sunday. Selection by dayOfWeek so it survives save (backend returns new ids). */
+  selectedDayOfWeek: number;
   templates = [
     {
       kind: 'push' as const,
@@ -68,30 +70,32 @@ export class PlanComponent implements OnInit {
 
   constructor(private store: PlanStore) {
     this.plan = this.store.get();
-    this.selectedDayId = this.plan.days[0]?.id ?? 0;
+    this.selectedDayOfWeek = getDayOfWeek();
   }
 
   ngOnInit(): void {
     this.store.loadActivePlan(() => {
       this.plan = this.store.get();
-      this.selectedDayId = this.plan.days[0]?.id ?? 0;
+      this.selectedDayOfWeek = getDayOfWeek();
     });
   }
 
-  private saveActivePlan(): void {
+  saveActivePlan(): void {
     this.store.saveActivePlan();
   }
 
   get selectedDay(): PlanDay | null {
     if (!this.plan || !this.plan.days) return null;
-    return this.plan.days.find((d: any) => d.id === this.selectedDayId) ?? null;
+    return this.plan.days.find((d: any) => d.dayOfWeek === this.selectedDayOfWeek) ?? null;
   }
 
-  selectDay(id: number) {
-    this.selectedDayId = id;
+  selectDay(dayOfWeek: number) {
+    this.selectedDayOfWeek = dayOfWeek;
   }
 
   addItem() {
+    const day = this.selectedDay;
+    if (!day) return;
     const name = this.exerciseName.trim();
     if (!name) return;
 
@@ -100,7 +104,7 @@ export class PlanComponent implements OnInit {
       .map((t) => t.trim())
       .filter(Boolean);
 
-    this.store.addItem(this.selectedDayId, {
+    this.store.addItem(day.id, {
       exerciseName: name,
       sets: Number(this.sets) || 0,
       repRange: this.repRange.trim(),
@@ -116,19 +120,25 @@ export class PlanComponent implements OnInit {
   }
 
   remove(itemId: number) {
-    this.store.removeItem(this.selectedDayId, itemId);
+    const day = this.selectedDay;
+    if (!day) return;
+    this.store.removeItem(day.id, itemId);
     this.plan = this.store.get();
     this.saveActivePlan();
   }
 
   moveUp(itemId: number) {
-    this.store.moveItem(this.selectedDayId, itemId, -1);
+    const day = this.selectedDay;
+    if (!day) return;
+    this.store.moveItem(day.id, itemId, -1);
     this.plan = this.store.get();
     this.saveActivePlan();
   }
 
   moveDown(itemId: number) {
-    this.store.moveItem(this.selectedDayId, itemId, 1);
+    const day = this.selectedDay;
+    if (!day) return;
+    this.store.moveItem(day.id, itemId, 1);
     this.plan = this.store.get();
     this.saveActivePlan();
   }
@@ -136,12 +146,14 @@ export class PlanComponent implements OnInit {
   reset() {
     this.store.reset();
     this.plan = this.store.get();
-    this.selectedDayId = this.plan.days[0]?.id ?? 0;
+    this.selectedDayOfWeek = getDayOfWeek();
     this.saveActivePlan();
   }
 
   edit(itemId: number, patch: any) {
-    this.store.updateItem(this.selectedDayId, itemId, patch);
+    const day = this.selectedDay;
+    if (!day) return;
+    this.store.updateItem(day.id, itemId, patch);
     this.plan = this.store.get();
     this.saveActivePlan();
   }
@@ -151,13 +163,15 @@ export class PlanComponent implements OnInit {
     if (!day) return;
     const ids = [...day.items.map((it) => it.id)];
     for (const id of ids) {
-      this.store.removeItem(this.selectedDayId, id);
+      this.store.removeItem(day.id, id);
     }
     this.plan = this.store.get();
     this.saveActivePlan();
   }
 
   applyTemplate(kind: 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'torso' | 'limbs') {
+    const day = this.selectedDay;
+    if (!day) return;
     this.clearDay();
 
     const add = (
@@ -168,7 +182,7 @@ export class PlanComponent implements OnInit {
       group: string,
       tags: string[]
     ) => {
-      this.store.addItem(this.selectedDayId, {
+      this.store.addItem(day.id, {
         exerciseName,
         sets,
         repRange,

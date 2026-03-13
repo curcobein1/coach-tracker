@@ -28,8 +28,8 @@
     <button
       *ngFor="let d of plan.days"
       class="day"
-      [class.active]="d.id === selectedDayId"
-      (click)="selectDay(d.id)"
+      [class.active]="d.dayOfWeek === selectedDayOfWeek"
+      (click)="selectDay(d.dayOfWeek)"
       type="button"
     >
       <div class="t">{{ d.title }}</div>
@@ -43,8 +43,12 @@
       <div class="value">{{ day.title }}</div>
     </div>
 
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-      <button class="btn ghost" type="button" (click)="clearDay()">Clear day</button>
+    <div class="row" style="margin-top:8px; justify-content:space-between; align-items:center;">
+      <div class="label">Plan actions:</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn ghost" type="button" (click)="clearDay()">Clear day</button>
+        <button class="btn" type="button" (click)="saveActivePlan()">Save plan to backend</button>
+      </div>
     </div>
 
     <div class="grid">

@@ -13,3 +13,9 @@ export function todayKey(d = new Date()): string {
   const dd = String(d.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 }
+
+/** 1 = Monday, 7 = Sunday. Use this for plan days and today so Plan and Today stay in sync. */
+export function getDayOfWeek(d = new Date()): number {
+  const jsDay = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  return jsDay === 0 ? 7 : jsDay;
+}

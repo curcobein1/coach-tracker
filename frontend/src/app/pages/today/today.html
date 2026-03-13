@@ -5,6 +5,43 @@
       </div>
 
   <div class="card">
+    <div class="row" style="justify-content:space-between; align-items:center;">
+      <div class="title">Today's planned split (from plan)</div>
+      <div class="sub">{{ date }}</div>
+    </div>
+
+    <div class="sub" style="margin-top:6px; opacity:.8;">
+      Exercises and target sets/reps from the active plan stored in the database.
+    </div>
+
+    <div *ngIf="!todayPlanDay || !todayPlanDay.items || todayPlanDay.items.length === 0" class="sub" style="margin-top:8px;">
+      No planned split found for today. Set it on the Plan page and click "Save plan to backend".
+    </div>
+
+    <table
+      *ngIf="todayPlanDay && todayPlanDay.items && todayPlanDay.items.length > 0"
+      style="width:100%; margin-top:8px; font-size:13px; border-collapse:collapse;"
+    >
+      <thead>
+        <tr style="text-align:left; border-bottom:1px solid #333;">
+          <th style="padding:4px 0;">#</th>
+          <th style="padding:4px 0;">Exercise (id)</th>
+          <th style="padding:4px 0;">Target sets</th>
+          <th style="padding:4px 0;">Target reps</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let it of todayPlanDay!.items; let idx = index" style="border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:4px 0;">{{ idx + 1 }}</td>
+          <td style="padding:4px 0;">Exercise {{ it.exerciseId }}</td>
+          <td style="padding:4px 0;">{{ it.targetSets }}</td>
+          <td style="padding:4px 0;">{{ it.targetReps || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
     <div class="form">
       <input class="input" asciiOnly placeholder="Exercise (Bench Press)" [(ngModel)]="exerciseName" />
 

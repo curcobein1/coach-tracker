@@ -174,31 +174,49 @@ export class PlanStore {
   }
 
   private mapFromDto(dto: TrainingPlanDto): PlanState {
+    const dayNames: Record<number, string> = {
+      1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday',
+      5: 'Friday', 6: 'Saturday', 7: 'Sunday'
+    };
+    const fromDto = dto.days.map((d) => ({
+      id: d.id,
+      dayOfWeek: d.dayOfWeek,
+      name: d.name,
+      title: d.name,
+      items: d.items.map((i) => ({
+        id: i.id,
+        exerciseId: i.exerciseId,
+        orderIndex: i.orderIndex,
+        targetSets: i.targetSets,
+        targetReps: i.targetReps ?? null,
+        targetRestSeconds: i.targetRestSeconds ?? null,
+        notes: i.notes ?? null,
+
+        exerciseName: `Exercise ${i.exerciseId}`,
+        sets: i.targetSets,
+        repRange: i.targetReps ?? null,
+        rir: null,
+        tags: [],
+        group: null
+      }))
+    }));
+    // Ensure exactly 7 days (1=Mon..7=Sun) so Plan and Today stay in sync
+    const byDayOfWeek = new Map(fromDto.map((d) => [d.dayOfWeek, d]));
+    const days: PlanDay[] = [];
+    for (let dow = 1; dow <= 7; dow++) {
+      const existing = byDayOfWeek.get(dow);
+      days.push(existing ?? {
+        id: 0,
+        dayOfWeek: dow,
+        name: dayNames[dow],
+        title: dayNames[dow],
+        items: []
+      });
+    }
     return {
       id: dto.id,
       name: dto.name,
-      days: dto.days.map((d) => ({
-        id: d.id,
-        dayOfWeek: d.dayOfWeek,
-        name: d.name,
-        title: d.name,
-        items: d.items.map((i) => ({
-          id: i.id,
-          exerciseId: i.exerciseId,
-          orderIndex: i.orderIndex,
-          targetSets: i.targetSets,
-          targetReps: i.targetReps ?? null,
-          targetRestSeconds: i.targetRestSeconds ?? null,
-          notes: i.notes ?? null,
-
-          exerciseName: `Exercise ${i.exerciseId}`,
-          sets: i.targetSets,
-          repRange: i.targetReps ?? null,
-          rir: null,
-          tags: [],
-          group: null
-        }))
-      }))
+      days
     };
   }
 
