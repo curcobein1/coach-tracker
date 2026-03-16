@@ -3,6 +3,7 @@ using System;
 using CoachTracker.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoachTracker.api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260316123658_AlignWithSeededSplits")]
+    partial class AlignWithSeededSplits
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
@@ -444,22 +447,22 @@ namespace CoachTracker.api.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "torso / limbs"
+                            Name = "Torso / Limbs"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "upper / lower"
+                            Name = "Upper / Lower"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "anterior / posterior"
+                            Name = "Anterior / Posterior"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "push / pull / legs"
+                            Name = "Push / Pull / Legs"
                         });
                 });
 
@@ -489,63 +492,63 @@ namespace CoachTracker.api.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "torso",
+                            Name = "Torso",
                             OrderIndex = 0,
                             SplitId = 1
                         },
                         new
                         {
                             Id = 2,
-                            Name = "limbs",
+                            Name = "Limbs",
                             OrderIndex = 1,
                             SplitId = 1
                         },
                         new
                         {
                             Id = 3,
-                            Name = "upper",
+                            Name = "Upper",
                             OrderIndex = 0,
                             SplitId = 2
                         },
                         new
                         {
                             Id = 4,
-                            Name = "lower",
+                            Name = "Lower",
                             OrderIndex = 1,
                             SplitId = 2
                         },
                         new
                         {
                             Id = 5,
-                            Name = "anterior",
+                            Name = "Anterior",
                             OrderIndex = 0,
                             SplitId = 3
                         },
                         new
                         {
                             Id = 6,
-                            Name = "posterior",
+                            Name = "Posterior",
                             OrderIndex = 1,
                             SplitId = 3
                         },
                         new
                         {
                             Id = 7,
-                            Name = "push",
+                            Name = "Push",
                             OrderIndex = 0,
                             SplitId = 4
                         },
                         new
                         {
                             Id = 8,
-                            Name = "pull",
+                            Name = "Pull",
                             OrderIndex = 1,
                             SplitId = 4
                         },
                         new
                         {
                             Id = 9,
-                            Name = "legs",
+                            Name = "Legs",
                             OrderIndex = 2,
                             SplitId = 4
                         });

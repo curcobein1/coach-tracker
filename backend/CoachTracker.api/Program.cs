@@ -44,13 +44,12 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-    await SeedIfEmptyAsync(db);
+    await SeedSplitDayTemplatesAsync(db);
 }
 
 app.UseCors("frontend");
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
 
 
 if (app.Environment.IsDevelopment())
@@ -65,49 +64,66 @@ app.MapControllers();
 
 app.Run();
 
-static async Task SeedIfEmptyAsync(AppDbContext db)
+static async Task SeedSplitDayTemplatesAsync(AppDbContext db)
 {
-    if (await db.Exercises.AnyAsync()) return;
-    var exercises = new[]
+    // 1) Define which exercises go with which split day (by names).
+    //    You fill this out however you like.
+    var template = new Dictionary<(string splitName, string dayName), string[]>
     {
-        new Exercise { Name = "Bench Press", Equipment = "Barbell", MovementPatternTag = "Compound", PrimaryMuscle = "Chest", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Squat", Equipment = "Barbell", MovementPatternTag = "Compound", PrimaryMuscle = "Quads", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Deadlift", Equipment = "Barbell", MovementPatternTag = "Compound", PrimaryMuscle = "Back", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Overhead Press", Equipment = "Barbell", MovementPatternTag = "Compound", PrimaryMuscle = "Shoulders", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Barbell Row", Equipment = "Barbell", MovementPatternTag = "Compound", PrimaryMuscle = "Back", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Lat Pulldown", Equipment = "Cable", MovementPatternTag = "Isolation", PrimaryMuscle = "Back", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Leg Press", Equipment = "Machine", MovementPatternTag = "Compound", PrimaryMuscle = "Quads", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Dumbbell Curl", Equipment = "Dumbbell", MovementPatternTag = "Isolation", PrimaryMuscle = "Biceps", DefaultPlannedSets = 3 },
-        new Exercise { Name = "Tricep Pushdown", Equipment = "Cable", MovementPatternTag = "Isolation", PrimaryMuscle = "Triceps", DefaultPlannedSets = 3 },
+        // Example: PPL split
+        { ("push / pull / legs", "push"), new[] { "incline sm press", "oh press","pec-deck","cable cuff lraise", "seated cable triceps oh extension", "jm press" } },
+        { ("push / pull / legs", "pull"), new[] { "weighted p-up", "l_pd(wg)", "seated incline curl", "upper-back row", "kelso shrug", "narrow grip latfocusedsinglearm row", "preachers", "buttaflies" } },
+        { ("push / pull / legs", "legs"), new[] { "leg xtension", "sm bulgarians", "hipaBBductor", "hipadDuctor", "baxktension", "calf"  } },
+        { ("upper / lower", "upper"), new[] { "weighted p-up", "weighteddips", "incline sm press", "upper-back row", "cable cuff lraise", "buttaflies", "seated cable triceps oh extension", "preachers"  } },
+        { ("upper / lower", "lower"), new[] { "leg xtension", "sm bulgarians", "hipaBBductor", "hipadDuctor", "baxktension", "calf" } },
+        { ("torso / limbs", "torso"), new[] { "incline sm press", "l_pd(wg)", "oh press", "upper-back row", "hipthrust", "pec-deck", "cable crunch" } },
+        { ("torso / limbs", "limbs"), new[] { "leg xtension", "takanakas", "seated cable triceps oh extension", "seated incline curl", "forearms(r/k)", "singlearm tpushdown", "preachers"  } },
+        { ("anterior / posterior", "anterior"), new[] { "bushi", "horshi", "dogshi" } },
+        { ("anterior / posterior", "posterior"), new[] { "yadi", "yaddi", "yadda" } },
     };
-    db.Exercises.AddRange(exercises);
-    await db.SaveChangesAsync();
-    var split = new Split { Name = "Push / Pull / Legs" };
-    db.Splits.Add(split);
-    await db.SaveChangesAsync();
-    var d1 = new SplitDay { SplitId = split.Id, Name = "Push", OrderIndex = 0 };
-    var d2 = new SplitDay { SplitId = split.Id, Name = "Pull", OrderIndex = 1 };
-    var d3 = new SplitDay { SplitId = split.Id, Name = "Legs", OrderIndex = 2 };
-    db.SplitDays.AddRange(d1, d2, d3);
-    await db.SaveChangesAsync();
-    var bench = exercises.First(e => e.Name == "Bench Press");
-    var ohp = exercises.First(e => e.Name == "Overhead Press");
-    var tri = exercises.First(e => e.Name == "Tricep Pushdown");
-    db.SplitDayExercises.AddRange(
-        new SplitDayExercise { SplitDayId = d1.Id, ExerciseId = bench.Id, OrderIndex = 0, TargetSets = 3, TargetRepRange = "8-12" },
-        new SplitDayExercise { SplitDayId = d1.Id, ExerciseId = ohp.Id, OrderIndex = 1, TargetSets = 3, TargetRepRange = "8-12" },
-        new SplitDayExercise { SplitDayId = d1.Id, ExerciseId = tri.Id, OrderIndex = 2, TargetSets = 3, TargetRepRange = "10-15" });
-    var row = exercises.First(e => e.Name == "Barbell Row");
-    var lat = exercises.First(e => e.Name == "Lat Pulldown");
-    var curl = exercises.First(e => e.Name == "Dumbbell Curl");
-    db.SplitDayExercises.AddRange(
-        new SplitDayExercise { SplitDayId = d2.Id, ExerciseId = row.Id, OrderIndex = 0, TargetSets = 3, TargetRepRange = "8-12" },
-        new SplitDayExercise { SplitDayId = d2.Id, ExerciseId = lat.Id, OrderIndex = 1, TargetSets = 3, TargetRepRange = "10-12" },
-        new SplitDayExercise { SplitDayId = d2.Id, ExerciseId = curl.Id, OrderIndex = 2, TargetSets = 3, TargetRepRange = "10-15" });
-    var squat = exercises.First(e => e.Name == "Squat");
-    var legPress = exercises.First(e => e.Name == "Leg Press");
-    db.SplitDayExercises.AddRange(
-        new SplitDayExercise { SplitDayId = d3.Id, ExerciseId = squat.Id, OrderIndex = 0, TargetSets = 3, TargetRepRange = "6-10" },
-        new SplitDayExercise { SplitDayId = d3.Id, ExerciseId = legPress.Id, OrderIndex = 1, TargetSets = 3, TargetRepRange = "10-15" });
-    await db.SaveChangesAsync();
+
+    if (template.Count == 0) return;
+
+    // 2) Load current splits/days/exercises once
+    var splits = await db.Splits
+        .Include(s => s.Days)
+            .ThenInclude(d => d.Exercises)
+        .ToListAsync();
+    var allExercises = await db.Exercises.ToListAsync();
+
+    foreach (var ((splitName, dayName), exerciseNames) in template)
+    {
+        var split = splits.FirstOrDefault(s =>
+            s.Name.Equals(splitName, StringComparison.OrdinalIgnoreCase));
+        if (split == null) continue;
+
+        var day = split.Days.FirstOrDefault(d =>
+            d.Name.Equals(dayName, StringComparison.OrdinalIgnoreCase));
+        if (day == null) continue;
+
+        // Skip if this day already has a template defined
+        if (day.Exercises.Any()) continue;
+
+        var selectedExercises = allExercises
+            .Where(e => exerciseNames.Contains(e.Name))
+            .ToList();
+
+        var order = 0;
+        foreach (var ex in selectedExercises)
+        {
+            db.SplitDayExercises.Add(new SplitDayExercise
+            {
+                SplitDayId = day.Id,
+                ExerciseId = ex.Id,
+                OrderIndex = order++,
+                TargetSets = ex.DefaultPlannedSets ?? 3,
+                TargetRepRange = "8-12"
+            });
+        }
+    }
+
+    if (db.ChangeTracker.HasChanges())
+    {
+        await db.SaveChangesAsync();
+    }
 }

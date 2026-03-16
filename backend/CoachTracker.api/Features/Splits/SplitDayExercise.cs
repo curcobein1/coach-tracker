@@ -6,9 +6,11 @@ public class SplitDayExercise
 {
     public int Id { get; set; }
     public int SplitDayId { get; set; }
-    public SplitDay SplitDay { get; set; } = null!;
+    public SplitDay? SplitDay { get; set; } = null!;
+
     public int ExerciseId { get; set; }
-    public Exercise Exercise { get; set; } = null!;
+    public Exercise? Exercise { get; set; } = null!;
+
     public int OrderIndex { get; set; }
     public int TargetSets { get; set; }
     public string? TargetRepRange { get; set; }
