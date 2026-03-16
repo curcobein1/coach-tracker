@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\eodabasi\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj": {}
+    "C:\\Users\\user\\Documents\\GitHub\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\eodabasi\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj": {
+    "C:\\Users\\user\\Documents\\GitHub\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\eodabasi\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj",
+        "projectUniqueName": "C:\\Users\\user\\Documents\\GitHub\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj",
         "projectName": "CoachTracker.api",
-        "projectPath": "C:\\Users\\eodabasi\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj",
-        "packagesPath": "C:\\Users\\eodabasi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\eodabasi\\coach-tracker\\backend\\CoachTracker.api\\obj\\",
+        "projectPath": "C:\\Users\\user\\Documents\\GitHub\\coach-tracker\\backend\\CoachTracker.api\\CoachTracker.api.csproj",
+        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user\\Documents\\GitHub\\coach-tracker\\backend\\CoachTracker.api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\eodabasi\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"

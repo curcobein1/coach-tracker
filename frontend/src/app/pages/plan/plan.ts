@@ -1,256 +1,84 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PlanStore, PlanDay } from '../../core/services/plan.store';
-import { getDayOfWeek } from '../../core/utils/training-math';
+import { SplitsApiService, SplitDetailDto, SplitDayDto, SplitDayExerciseDto, SplitListItemDto } from '../../core/services/splits-api.service';
+import { CalendarApiService } from '../../core/services/calendar-api.service';
+import { ExercisesApiService, ExerciseDto } from '../../core/services/exercises-api.service';
+import { todayKey } from '../../core/utils/training-math';
+
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-plan',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SelectModule, ButtonModule, CardModule],
   templateUrl: './plan.html',
   styleUrls: ['./plan.scss'],
 })
 export class PlanComponent implements OnInit {
-  plan;
-  /** 1 = Monday, 7 = Sunday. Selection by dayOfWeek so it survives save (backend returns new ids). */
-  selectedDayOfWeek: number;
-  templates = [
-    {
-      kind: 'push' as const,
-      title: 'Push',
-      preview: ['Bench Press', 'Incline DB Press', 'Overhead Press', 'Lateral Raise', 'Triceps Pushdown'],
-    },
-    {
-      kind: 'pull' as const,
-      title: 'Pull',
-      preview: ['Pull-up / Lat Pulldown', 'Chest Supported Row', 'One-Arm Row', 'Rear Delt Fly', 'Biceps Curl'],
-    },
-    {
-      kind: 'legs' as const,
-      title: 'Legs',
-      preview: ['Squat / Leg Press', 'Romanian Deadlift', 'Leg Curl', 'Leg Extension', 'Calf Raise'],
-    },
-    {
-      kind: 'upper' as const,
-      title: 'Upper',
-      preview: ['Bench Press', 'Row', 'Lat Pulldown', 'Overhead Press', 'Curl', 'Triceps Pushdown'],
-    },
-    {
-      kind: 'lower' as const,
-      title: 'Lower',
-      preview: ['Squat / Leg Press', 'RDL', 'Split Squat', 'Calf Raise'],
-    },
-    {
-      kind: 'torso' as const,
-      title: 'Torso',
-      preview: ['Incline Press', 'Row', 'Lat Pulldown', 'RDL', 'Lateral Raise', 'Abs'],
-    },
-    {
-      kind: 'limbs' as const,
-      title: 'Limbs',
-      preview: ['Leg Press', 'Leg Curl', 'Lateral Raise', 'Biceps Curl', 'Triceps Pushdown', 'Calf Raise'],
-    },
-  ];
+  splits: SplitListItemDto[] = [];
+  selectedSplit: SplitDetailDto | null = null;
+  selectedDay: SplitDayDto | null = null;
+  exercises: ExerciseDto[] = [];
+  todayKey = todayKey();
+  loading = false;
+  error: string | null = null;
 
-  get filteredItems() {
-    const day = this.selectedDay;
-    if (!day) return [];
-    if (this.filterGroup === 'All') return day.items;
-    return day.items.filter((it) => it.group === this.filterGroup);
-  }
-
-  exerciseName = '';
-  sets = 3;
-  repRange = '6-10';
-  rir: number | null = 2;
-  group = 'Back';
-  tagsText = '';
-  filterGroup = 'All';
-
-  constructor(private store: PlanStore) {
-    this.plan = this.store.get();
-    this.selectedDayOfWeek = getDayOfWeek();
-  }
+  constructor(
+    private splitsApi: SplitsApiService,
+    private calendarApi: CalendarApiService,
+    private exercisesApi: ExercisesApiService
+  ) {}
 
   ngOnInit(): void {
-    this.store.loadActivePlan(() => {
-      this.plan = this.store.get();
-      this.selectedDayOfWeek = getDayOfWeek();
+    this.loadSplits();
+    this.loadExercises();
+  }
+
+  loadSplits(): void {
+    this.splitsApi.list().subscribe({
+      next: (list) => { this.splits = list; },
+      error: (e) => { this.error = 'Failed to load splits'; console.error(e); }
     });
   }
 
-  saveActivePlan(): void {
-    this.store.saveActivePlan();
-  }
-
-  get selectedDay(): PlanDay | null {
-    if (!this.plan || !this.plan.days) return null;
-    return this.plan.days.find((d: any) => d.dayOfWeek === this.selectedDayOfWeek) ?? null;
-  }
-
-  selectDay(dayOfWeek: number) {
-    this.selectedDayOfWeek = dayOfWeek;
-  }
-
-  addItem() {
-    const day = this.selectedDay;
-    if (!day) return;
-    const name = this.exerciseName.trim();
-    if (!name) return;
-
-    const tags = this.tagsText
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    this.store.addItem(day.id, {
-      exerciseName: name,
-      sets: Number(this.sets) || 0,
-      repRange: this.repRange.trim(),
-      rir: this.rir === null ? null : Number(this.rir),
-      group: this.group,
-      tags,
+  loadExercises(): void {
+    this.exercisesApi.list().subscribe({
+      next: (list) => { this.exercises = list; },
+      error: (e) => { console.error('Failed to load exercises', e); }
     });
-
-    this.exerciseName = '';
-    this.tagsText = '';
-    this.plan = this.store.get();
-    this.saveActivePlan();
   }
 
-  remove(itemId: number) {
-    const day = this.selectedDay;
-    if (!day) return;
-    this.store.removeItem(day.id, itemId);
-    this.plan = this.store.get();
-    this.saveActivePlan();
+  onSelectSplit(splitId: number): void {
+    if (!splitId) { this.selectedSplit = null; this.selectedDay = null; return; }
+    this.loading = true;
+    this.splitsApi.getById(splitId).subscribe({
+      next: (detail) => { this.selectedSplit = detail; this.selectedDay = detail.days[0] ?? null; this.loading = false; },
+      error: (e) => { this.error = 'Failed to load split'; this.loading = false; }
+    });
   }
 
-  moveUp(itemId: number) {
-    const day = this.selectedDay;
-    if (!day) return;
-    this.store.moveItem(day.id, itemId, -1);
-    this.plan = this.store.get();
-    this.saveActivePlan();
+  selectDay(day: SplitDayDto): void {
+    this.selectedDay = day;
   }
 
-  moveDown(itemId: number) {
-    const day = this.selectedDay;
-    if (!day) return;
-    this.store.moveItem(day.id, itemId, 1);
-    this.plan = this.store.get();
-    this.saveActivePlan();
+  assignDayToToday(): void {
+    if (!this.selectedDay) return;
+    this.calendarApi.assignDay(this.todayKey, this.selectedDay.id).subscribe({
+      next: () => { this.error = null; },
+      error: (e) => { this.error = 'Failed to assign'; console.error(e); }
+    });
   }
 
-  reset() {
-    this.store.reset();
-    this.plan = this.store.get();
-    this.selectedDayOfWeek = getDayOfWeek();
-    this.saveActivePlan();
-  }
-
-  edit(itemId: number, patch: any) {
-    const day = this.selectedDay;
-    if (!day) return;
-    this.store.updateItem(day.id, itemId, patch);
-    this.plan = this.store.get();
-    this.saveActivePlan();
-  }
-
-  clearDay() {
-    const day = this.selectedDay;
-    if (!day) return;
-    const ids = [...day.items.map((it) => it.id)];
-    for (const id of ids) {
-      this.store.removeItem(day.id, id);
-    }
-    this.plan = this.store.get();
-    this.saveActivePlan();
-  }
-
-  applyTemplate(kind: 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'torso' | 'limbs') {
-    const day = this.selectedDay;
-    if (!day) return;
-    this.clearDay();
-
-    const add = (
-      exerciseName: string,
-      sets: number,
-      repRange: string,
-      rir: number | null,
-      group: string,
-      tags: string[]
-    ) => {
-      this.store.addItem(day.id, {
-        exerciseName,
-        sets,
-        repRange,
-        rir,
-        group,
-        tags,
-      });
-    };
-
-    if (kind === 'pull') {
-      add('Pull-up / Lat Pulldown', 4, '6-10', 2, 'Back', ['vertical_pull', 'lats']);
-      add('Chest Supported Row', 4, '8-12', 2, 'Back', ['horizontal_pull', 'upper_back']);
-      add('One-Arm Row', 3, '8-12', 2, 'Back', ['horizontal_pull', 'lats']);
-      add('Rear Delt Fly', 3, '12-20', 2, 'Shoulders', ['rear_delts', 'upper_back']);
-      add('Biceps Curl', 3, '10-15', 1, 'Arms', ['biceps', 'isolation']);
-    }
-
-    if (kind === 'push') {
-      add('Bench Press', 4, '5-8', 2, 'Chest', ['press_horizontal', 'compound']);
-      add('Incline Dumbbell Press', 3, '8-12', 2, 'Chest', ['upper_chest']);
-      add('Overhead Press', 3, '6-10', 2, 'Shoulders', ['press_vertical']);
-      add('Lateral Raise', 4, '12-20', 2, 'Shoulders', ['side_delts']);
-      add('Triceps Pushdown', 3, '10-15', 1, 'Arms', ['triceps']);
-    }
-
-    if (kind === 'legs') {
-      add('Squat / Leg Press', 4, '6-10', 2, 'Legs', ['squat_pattern', 'quads']);
-      add('Romanian Deadlift', 4, '6-10', 2, 'Legs', ['hinge', 'hamstrings', 'glutes']);
-      add('Leg Curl', 3, '10-15', 1, 'Legs', ['hamstrings']);
-      add('Leg Extension', 3, '10-15', 1, 'Legs', ['quads']);
-      add('Calf Raise', 4, '10-20', 1, 'Legs', ['calves']);
-    }
-
-    if (kind === 'upper') {
-      add('Bench Press', 3, '5-8', 2, 'Chest', ['press_horizontal']);
-      add('Row', 3, '6-10', 2, 'Back', ['horizontal_pull']);
-      add('Lat Pulldown', 3, '8-12', 2, 'Back', ['vertical_pull']);
-      add('Overhead Press', 2, '6-10', 2, 'Shoulders', ['press_vertical']);
-      add('Curl', 2, '10-15', 1, 'Arms', ['biceps']);
-      add('Triceps Pushdown', 2, '10-15', 1, 'Arms', ['triceps']);
-    }
-
-    if (kind === 'lower') {
-      add('Squat / Leg Press', 4, '6-10', 2, 'Legs', ['squat_pattern', 'quads']);
-      add('RDL', 4, '6-10', 2, 'Legs', ['hinge', 'hamstrings']);
-      add('Split Squat', 3, '8-12', 2, 'Legs', ['unilateral', 'quads', 'glutes']);
-      add('Calf Raise', 4, '10-20', 1, 'Legs', ['calves']);
-    }
-
-    if (kind === 'torso') {
-      add('Incline Dumbbell Press', 4, '6-10', 2, 'Chest', ['upper_chest', 'press_horizontal']);
-      add('Row', 4, '6-10', 2, 'Back', ['horizontal_pull', 'upper_back']);
-      add('Lat Pulldown / Pull-up', 3, '8-12', 2, 'Back', ['vertical_pull', 'lats']);
-      add('Romanian Deadlift', 3, '6-10', 2, 'Legs', ['hinge', 'hamstrings', 'glutes']);
-      add('Lateral Raise', 4, '12-20', 2, 'Shoulders', ['side_delts']);
-      add('Hanging Leg Raise / Cable Crunch', 3, '10-15', 1, 'Core', ['abs']);
-    }
-
-    if (kind === 'limbs') {
-      add('Leg Press / Hack Squat', 4, '8-12', 2, 'Legs', ['quads']);
-      add('Leg Curl', 4, '10-15', 1, 'Legs', ['hamstrings']);
-      add('Lateral Raise', 4, '12-20', 2, 'Shoulders', ['side_delts']);
-      add('Biceps Curl', 4, '8-12', 1, 'Arms', ['biceps']);
-      add('Triceps Pushdown', 4, '8-12', 1, 'Arms', ['triceps']);
-      add('Calf Raise', 4, '10-20', 1, 'Legs', ['calves']);
-    }
-
-    this.plan = this.store.get();
-    this.saveActivePlan();
+  removeExercise(item: SplitDayExerciseDto): void {
+    if (!this.selectedSplit || !this.selectedDay) return;
+    this.splitsApi.removeDayExercise(item.id).subscribe({
+      next: () => {
+        this.selectedDay!.exercises = this.selectedDay!.exercises.filter(e => e.id !== item.id);
+      },
+      error: (e) => { console.error(e); }
+    });
   }
 }

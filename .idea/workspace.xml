@@ -2,42 +2,86 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="73b8befa-5d48-4ed1-9857-a23f68402bc5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutSession.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutSetLog.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Data/AppDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Data/AppDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/PlansController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/PlansController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlan.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlan.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlanDay.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlanDay.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlanItem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlanItem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutExerciseLog" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/PlanDtos.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutSession" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/LogSetDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutSetLog" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutExerciseLog.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Exercises/Exercise.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Exercises/Exercise.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/PlanDtos.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/PlansController.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlan.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlanDay.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Plans/TrainingPlanItem.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/LogSetDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/LogSetDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutExerciseLog.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutSession.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutSetLog.cs" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Features/Workouts/WorkoutsController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260309103045_InitialCreate.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260309103045_InitialCreate.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260309104836_AddTrainingPlanTables.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260309104836_AddTrainingPlanTables.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260311115049_AddWorkoutExecutionTables.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260311115049_AddWorkoutExecutionTables.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260311132716_RebuildInitialSchema.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260311132716_RebuildInitialSchema.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260312072813_AddNutritionAndKvTables.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260312072813_AddNutritionAndKvTables.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260312072909_FixNutritionUsualPrimaryKey.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/20260312072909_FixNutritionUsualPrimaryKey.cs" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/AppDbContextModelSnapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Migrations/AppDbContextModelSnapshot.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/bin/Debug/net10.0/CoachTracker.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/bin/Debug/net10.0/CoachTracker.api.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/bin/Debug/net10.0/CoachTracker.api.exe" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/bin/Debug/net10.0/CoachTracker.api.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/bin/Debug/net10.0/CoachTracker.api.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/bin/Debug/net10.0/CoachTracker.api.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/coachtracker.db" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/coachtracker.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/CoachTracker.api.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/CoachTracker.api.csproj.nuget.dgspec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/CoachTracker.api.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/CoachTracker.api.csproj.nuget.g.props" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.GeneratedMSBuildEditorConfig.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.MvcApplicationPartsAssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.MvcApplicationPartsAssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.csproj.AssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.csproj.CoreCompileInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.csproj.FileListAbsolute.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.genruntimeconfig.cache" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.genruntimeconfig.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/CoachTracker.api.sourcelink.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/apphost.exe" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/apphost.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/ref/CoachTracker.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/ref/CoachTracker.api.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/refint/CoachTracker.api.dll" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/refint/CoachTracker.api.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/rjsmrazor.dswa.cache.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/logs.store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/core/services/logs.store.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/plan.store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/core/services/plan.store.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/plans-api.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/core/services/plans-api.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/Debug/net10.0/rpswa.dswa.cache.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/project.assets.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/CoachTracker.api/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/backend/CoachTracker.api/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/angular.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/angular.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/app.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/app.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/app.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/app.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/app.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/app.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/app.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/app.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/backend-sync.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/exercise-analytics.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/exercises-api.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/core/services/exercises-api.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/logs.store.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/plan.store.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/plans-api.service.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/app/core/services/workouts-api.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/core/services/workouts-api.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.scss" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.spec.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/plan/plan.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/settings/settings.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/settings/settings.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/settings/settings.spec.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/settings/settings.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/today/today.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/today/today.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/today/today.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/today/today.spec.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/app/pages/today/today.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/pages/today/today.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/shared/shared-imports.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/shared/shared-imports.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

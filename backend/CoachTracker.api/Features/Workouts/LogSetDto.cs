@@ -6,5 +6,9 @@ public class LogSetDto
     public double Weight { get; set; }
     public int Reps { get; set; }
     public int Rir { get; set; }
+}
 
+public class AddWorkoutNoteDto
+{
+    public string? Text { get; set; }
 }

@@ -1,134 +1,106 @@
-      <div class="page">
-      <div class="header">
-        <h2 class="h1">Today</h2>
-        <div class="sub">{{ date }}</div>
-      </div>
+<div class="page">
+  <div class="header">
+    <h2 class="h1">Today</h2>
+    <div class="sub">{{ date }}</div>
+  </div>
 
-  <div class="card">
+  <p-card styleClass="mt-4">
     <div class="row" style="justify-content:space-between; align-items:center;">
-      <div class="title">Today's planned split (from plan)</div>
+      <div class="title">Today's planned split</div>
       <div class="sub">{{ date }}</div>
     </div>
-
     <div class="sub" style="margin-top:6px; opacity:.8;">
-      Exercises and target sets/reps from the active plan stored in the database.
+      <span *ngIf="todayPlannedFromCalendar">From calendar: {{ todayPlannedFromCalendar.splitName }} – {{ todayPlannedFromCalendar.splitDayName }}</span>
+      <span *ngIf="!todayPlannedFromCalendar">Assign a split day to today on the Plan page.</span>
     </div>
-
-    <div *ngIf="!todayPlanDay || !todayPlanDay.items || todayPlanDay.items.length === 0" class="sub" style="margin-top:8px;">
-      No planned split found for today. Set it on the Plan page and click "Save plan to backend".
-    </div>
-
-    <table
-      *ngIf="todayPlanDay && todayPlanDay.items && todayPlanDay.items.length > 0"
-      style="width:100%; margin-top:8px; font-size:13px; border-collapse:collapse;"
-    >
-      <thead>
-        <tr style="text-align:left; border-bottom:1px solid #333;">
-          <th style="padding:4px 0;">#</th>
-          <th style="padding:4px 0;">Exercise</th>
-          <th style="padding:4px 0;">Target sets</th>
-          <th style="padding:4px 0;">Target reps</th>
+    <div *ngIf="!todayPlannedFromCalendar" class="sub" style="margin-top:8px;">No planned split for today.</div>
+    <p-table *ngIf="todayPlannedFromCalendar && todayPlannedFromCalendar.exercises.length > 0" [value]="todayPlannedFromCalendar.exercises" styleClass="p-datatable-sm mt-3">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Exercise</th>
+          <th>Target sets</th>
+          <th>Target reps</th>
+          <th style="width:40px;"></th>
         </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let it of todayPlanDay!.items; let idx = index" style="border-bottom:1px solid rgba(255,255,255,0.04);">
-          <td style="padding:4px 0;">{{ idx + 1 }}</td>
-          <td style="padding:4px 0;">{{ it.exerciseName || ('#' + it.exerciseId) }}</td>
-          <td style="padding:4px 0;">{{ it.targetSets }}</td>
-          <td style="padding:4px 0;">{{ it.targetReps || '-' }}</td>
+      </ng-template>
+      <ng-template pTemplate="body" let-it let-idx="rowIndex">
+        <tr>
+          <td>{{ idx + 1 }}</td>
+          <td>{{ it.exerciseName }}</td>
+          <td>{{ it.targetSets }}</td>
+          <td>{{ it.targetRepRange || '-' }}</td>
+          <td>
+            <p-button icon="pi pi-play" [rounded]="true" [text]="true" severity="success" (onClick)="prefillExercise(it.exerciseName)"></p-button>
+          </td>
         </tr>
-      </tbody>
-    </table>
-  </div>
+      </ng-template>
+    </p-table>
+  </p-card>
 
-  <div class="card" style="margin-top:20px;">
-    <div class="form">
-      <input class="input" asciiOnly placeholder="Exercise (Bench Press)" [(ngModel)]="exerciseName" />
-
-      <input
-        class="input"
-        asciiOnly
-        placeholder='kg (e.g., 80 or "40+bar")'
-        inputmode="decimal"
-        [(ngModel)]="kg"
-        (ngModelChange)="onKgInput($event)"
-      />
-
-      <input class="input" type="number" placeholder="reps" [(ngModel)]="reps" />
-      <input class="input" type="number" placeholder="RIR" [(ngModel)]="rir" />
-
-      <button class="btn" (click)="logSet()">Log set</button>
+  <p-card styleClass="mt-4">
+    <div class="flex gap-2 flex-wrap items-center">
+      <input pInputText class="p-inputtext-sm" asciiOnly placeholder="Exercise (Bench Press)" [(ngModel)]="exerciseName" />
+      <input pInputText class="p-inputtext-sm" asciiOnly placeholder='kg (e.g., 80 or "40+bar")' inputmode="decimal" [(ngModel)]="kg" (ngModelChange)="onKgInput($event)" />
+      <input pInputText class="p-inputtext-sm" type="number" placeholder="reps" [(ngModel)]="reps" style="width: 80px;" />
+      <input pInputText class="p-inputtext-sm" type="number" placeholder="RIR" [(ngModel)]="rir" style="width: 80px;" />
+      <p-button label="Log set locally" (onClick)="logSet()" size="small"></p-button>
     </div>
+    <div *ngIf="kgError" class="err mt-2">{{ kgError }}</div>
+  </p-card>
 
-    <div *ngIf="kgError" class="err">{{ kgError }}</div>
-
-    <div class="sub" style="margin-top:10px;">
-      Tip: Set baselines in Settings to see avg/last comparisons.
+  <p-card styleClass="mt-4">
+    <div class="title">Session notes</div>
+    <div class="sub" style="margin-top:4px;">Add a note for today's workout.</div>
+    <div class="flex gap-2 mt-2">
+      <textarea pInputText placeholder="Note..." [(ngModel)]="todayWorkout.notes" rows="2" style="flex:1; min-width:200px;"></textarea>
     </div>
-  </div>
+  </p-card>
 
-  <!-- Logged workout for today -->
-  <div class="card">
+  <p-card styleClass="mt-4">
     <div class="row" style="justify-content:space-between; align-items:center;">
-      <div class="title">Today sets (from backend)</div>
+      <div class="title">Draft Sets</div>
       <div class="sub">{{ date }}</div>
     </div>
-
-    <div class="sub" style="margin-top:6px; opacity:.8;">
-      Recent sets logged via the Log set form above.
-    </div>
-
-    <div *ngIf="!todayWorkout || !todayWorkout.exercises || todayWorkout.exercises.length === 0" class="sub" style="margin-top:8px;">
-      No sets logged yet.
-    </div>
-
-    <table
-      *ngIf="todayWorkout && todayWorkout.exercises && todayWorkout.exercises.length > 0"
-      style="width:100%; margin-top:8px; font-size:13px; border-collapse:collapse;"
-    >
-      <thead>
-        <tr style="text-align:left; border-bottom:1px solid #333;">
-          <th style="padding:4px 0;">Exercise</th>
-          <th style="padding:4px 0;">Set</th>
-          <th style="padding:4px 0;">kg</th>
-          <th style="padding:4px 0;">Reps</th>
-          <th style="padding:4px 0;">RIR</th>
-          <th style="padding:4px 0; width:40px;"></th>
+    <div class="sub" style="margin-top:6px; opacity:.8;">Sets logged locally via the form above. Click Finalize to push to server.</div>
+    <div *ngIf="todayWorkout.sets.length === 0" class="sub" style="margin-top:8px;">No sets logged yet.</div>
+    
+    <p-table *ngIf="todayWorkout.sets.length > 0" [value]="todayWorkout.sets" styleClass="p-datatable-sm mt-3">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Exercise</th>
+          <th>Set</th>
+          <th>kg</th>
+          <th>Reps</th>
+          <th>RIR</th>
+          <th style="width:40px;"></th>
         </tr>
-      </thead>
-      <tbody>
-        <ng-container *ngFor="let ex of todayWorkout.exercises">
-          <tr *ngFor="let s of ex.sets">
-            <td style="padding:4px 0; white-space:nowrap;">
-              {{ ex.exerciseName || ('#' + ex.exerciseId) }}
-            </td>
-            <td style="padding:4px 0;">{{ s.setNumber }}</td>
-            <td style="padding:4px 0;">{{ s.weight }}</td>
-            <td style="padding:4px 0;">{{ s.reps }}</td>
-            <td style="padding:4px 0;">{{ s.rir }}</td>
-            <td style="padding:4px 0;">
-              <button
-                type="button"
-                (click)="deleteSetById(s.id)"
-                style="border:none; background:transparent; color:#f66; cursor:pointer; font-size:13px; padding:0 4px;"
-                title="Remove set"
-              >
-                ×
-              </button>
-            </td>
-          </tr>
-        </ng-container>
-      </tbody>
-    </table>
-  </div>
+      </ng-template>
+      <ng-template pTemplate="body" let-s>
+        <tr>
+          <td>{{ s.exerciseName }}</td>
+          <td>{{ s.setNumber }}</td>
+          <td>{{ s.weight }}</td>
+          <td>{{ s.reps }}</td>
+          <td>{{ s.rir }}</td>
+          <td>
+            <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteSet(s)"></p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    
+    <div class="flex justify-content-end mt-4">
+        <p-button label="Finalize & Save Workout" icon="pi pi-check" severity="success" (onClick)="finalizeWorkout()"></p-button>
+    </div>
+  </p-card>
 
-  <div class="exercise-grid">
+  <div class="exercise-grid" *ngIf="stats.list().length > 0">
     <div class="exercise-card" *ngFor="let s of stats.list()">
       <div class="row">
         <div class="title">{{ s.exerciseName }}</div>
         <span class="pill">Avg e1RM: {{ s.currentAvgE1RM }}</span>
       </div>
-
       <div class="metrics">
         <span class="metric">Baseline: {{ s.baselineE1RM }}</span>
         <span class="metric">Last: {{ (snap(s.exerciseName)?.lastSessionBestE1RM ?? '-') }}</span>
@@ -137,57 +109,48 @@
     </div>
   </div>
 
-  <!-- Bottom half: diet for today -->
-  <div class="card" style="margin-top:20px;">
+  <p-card styleClass="mt-4">
     <div class="row" style="justify-content:space-between; align-items:center;">
       <div class="title">Diet today</div>
       <div class="sub">{{ date }}</div>
     </div>
-
-    <div *ngIf="dietDay === null || dietDay.foods.length === 0" class="sub" style="margin-top:8px;">
-      No foods logged yet.
-    </div>
-
-    <table *ngIf="dietDay !== null && dietDay.foods.length > 0" style="width:100%; margin-top:8px; font-size:13px; border-collapse:collapse;">
-      <thead>
-        <tr style="text-align:left; border-bottom:1px solid #333;">
-          <th style="padding:4px 0; width:32px;"></th>
-          <th style="padding:4px 0;">Food</th>
-          <th style="padding:4px 0;">Grams</th>
-          <th style="padding:4px 0;">kcal</th>
-          <th style="padding:4px 0;">P</th>
-          <th style="padding:4px 0;">C</th>
-          <th style="padding:4px 0;">F</th>
+    <div *ngIf="dietDay === null || dietDay.foods.length === 0" class="sub" style="margin-top:8px;">No foods logged yet.</div>
+    <p-table *ngIf="dietDay !== null && dietDay.foods.length > 0" [value]="dietDay.foods" styleClass="p-datatable-sm mt-3">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width:40px;"></th>
+          <th>Food</th>
+          <th>Grams</th>
+          <th>kcal</th>
+          <th>P</th>
+          <th>C</th>
+          <th>F</th>
         </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let f of dietDay!.foods" style="border-bottom:1px solid rgba(255,255,255,0.04);">
-          <td style="padding:4px 0;">
-            <button
-              type="button"
-              (click)="deleteFood(f)"
-              style="border:none; background:transparent; color:#f66; cursor:pointer; font-size:14px; padding:0 4px;"
-              title="Remove"
-            >
-              ×
-            </button>
+      </ng-template>
+      <ng-template pTemplate="body" let-f>
+        <tr>
+          <td>
+            <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteFood(f)"></p-button>
           </td>
-          <td style="padding:4px 0;">{{ f.name }}</td>
-          <td style="padding:4px 0;">{{ f.grams }}</td>
-          <td style="padding:4px 0;">{{ f.kcal }}</td>
-          <td style="padding:4px 0;">{{ f.p }}</td>
-          <td style="padding:4px 0;">{{ f.c }}</td>
-          <td style="padding:4px 0;">{{ f.f }}</td>
+          <td>{{ f.name }}</td>
+          <td>{{ f.grams }}</td>
+          <td>{{ f.kcal }}</td>
+          <td>{{ f.p }}</td>
+          <td>{{ f.c }}</td>
+          <td>{{ f.f }}</td>
         </tr>
-        <tr style="border-top:1px solid #333; font-weight:600;">
+      </ng-template>
+      <ng-template pTemplate="footer">
+        <tr>
           <td></td>
-          <td style="padding:4px 0;">Total</td>
-          <td style="padding:4px 0;">{{ dietTotals.grams }}</td>
-          <td style="padding:4px 0;">{{ dietTotals.kcal }}</td>
-          <td style="padding:4px 0;">{{ dietTotals.p }}</td>
-          <td style="padding:4px 0;">{{ dietTotals.c }}</td>
-          <td style="padding:4px 0;">{{ dietTotals.f }}</td>
+          <td>Total</td>
+          <td>{{ dietTotals.grams }}</td>
+          <td>{{ dietTotals.kcal }}</td>
+          <td>{{ dietTotals.p }}</td>
+          <td>{{ dietTotals.c }}</td>
+          <td>{{ dietTotals.f }}</td>
         </tr>
-      </tbody>
-    </table>
-  </div>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

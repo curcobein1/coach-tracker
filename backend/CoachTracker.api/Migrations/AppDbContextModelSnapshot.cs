@@ -23,30 +23,183 @@ namespace CoachTracker.api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("DefaultPlannedSets")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Equipment")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Group")
-                        .IsRequired()
+                    b.Property<string>("MovementPatternTag")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Notes")
+                    b.Property<string>("PrimaryMuscle")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Tags")
+                    b.Property<string>("SecondaryMuscles")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("Exercises");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Barbell",
+                            MovementPatternTag = "Horizontal Press",
+                            Name = "Bench Press",
+                            PrimaryMuscle = "Pectorals"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Dumbbell",
+                            MovementPatternTag = "Incline Press",
+                            Name = "Incline Dumbbell Press",
+                            PrimaryMuscle = "Upper Pectorals"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Bodyweight",
+                            MovementPatternTag = "Horizontal Press",
+                            Name = "Push-ups",
+                            PrimaryMuscle = "Pectorals"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Bodyweight",
+                            MovementPatternTag = "Vertical Pull",
+                            Name = "Pull-ups",
+                            PrimaryMuscle = "Latissimus Dorsi"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Machine",
+                            MovementPatternTag = "Vertical Pull",
+                            Name = "Lat Pulldown",
+                            PrimaryMuscle = "Latissimus Dorsi"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Barbell",
+                            MovementPatternTag = "Horizontal Pull",
+                            Name = "Bent-over Row",
+                            PrimaryMuscle = "Rhomboids"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Barbell",
+                            MovementPatternTag = "Squat",
+                            Name = "Squats",
+                            PrimaryMuscle = "Quadriceps"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Barbell",
+                            MovementPatternTag = "Hinge",
+                            Name = "Romanian Deadlift",
+                            PrimaryMuscle = "Hamstrings"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Barbell",
+                            MovementPatternTag = "Hip Extension",
+                            Name = "Hip Thrust",
+                            PrimaryMuscle = "Glutes"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Machine",
+                            MovementPatternTag = "Leg Press",
+                            Name = "Leg Press",
+                            PrimaryMuscle = "Quadriceps"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Machine",
+                            MovementPatternTag = "Calf Raise",
+                            Name = "Calf Raises",
+                            PrimaryMuscle = "Calves"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Barbell",
+                            MovementPatternTag = "Vertical Press",
+                            Name = "Overhead Press",
+                            PrimaryMuscle = "Anterior Deltoids"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Dumbbell",
+                            MovementPatternTag = "Shoulder Isolation",
+                            Name = "Lateral Raises",
+                            PrimaryMuscle = "Lateral Deltoids"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Dumbbell",
+                            MovementPatternTag = "Elbow Flexion",
+                            Name = "Bicep Curls",
+                            PrimaryMuscle = "Biceps"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Cable",
+                            MovementPatternTag = "Elbow Extension",
+                            Name = "Tricep Extensions",
+                            PrimaryMuscle = "Triceps"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Bodyweight",
+                            MovementPatternTag = "Core Anti-Extension",
+                            Name = "Plank",
+                            PrimaryMuscle = "Abdominals"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            DefaultPlannedSets = 3,
+                            Equipment = "Bodyweight",
+                            MovementPatternTag = "Core Flexion",
+                            Name = "Hanging Leg Raises",
+                            PrimaryMuscle = "Abdominals"
+                        });
                 });
 
             modelBuilder.Entity("CoachTracker.Api.Features.Nutrition.NutritionFoodLog", b =>
@@ -125,13 +278,32 @@ namespace CoachTracker.api.Migrations
                     b.ToTable("NutritionUsuals");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlan", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.PlannedCalendarDay", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SplitDayId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date")
+                        .IsUnique();
+
+                    b.HasIndex("SplitDayId");
+
+                    b.ToTable("PlannedCalendarDays");
+                });
+
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.Split", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -140,33 +312,120 @@ namespace CoachTracker.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TrainingPlans");
+                    b.ToTable("Splits");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Torso / Limbs"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Upper / Lower"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Anterior / Posterior"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Push / Pull / Legs"
+                        });
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlanDay", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.SplitDay", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DayOfWeek")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TrainingPlanId")
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SplitId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TrainingPlanId");
+                    b.HasIndex("SplitId");
 
-                    b.ToTable("TrainingPlanDays");
+                    b.ToTable("SplitDays");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Torso",
+                            OrderIndex = 0,
+                            SplitId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Limbs",
+                            OrderIndex = 1,
+                            SplitId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Upper",
+                            OrderIndex = 0,
+                            SplitId = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Lower",
+                            OrderIndex = 1,
+                            SplitId = 2
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Anterior",
+                            OrderIndex = 0,
+                            SplitId = 3
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Posterior",
+                            OrderIndex = 1,
+                            SplitId = 3
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Push",
+                            OrderIndex = 0,
+                            SplitId = 4
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Pull",
+                            OrderIndex = 1,
+                            SplitId = 4
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Legs",
+                            OrderIndex = 2,
+                            SplitId = 4
+                        });
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlanItem", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.SplitDayExercise", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,25 +440,22 @@ namespace CoachTracker.api.Migrations
                     b.Property<int>("OrderIndex")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("TargetReps")
+                    b.Property<int>("SplitDayId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("TargetRestSeconds")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("TargetRepRange")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TargetSets")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TrainingPlanDayId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ExerciseId");
 
-                    b.HasIndex("TrainingPlanDayId");
+                    b.HasIndex("SplitDayId");
 
-                    b.ToTable("TrainingPlanItems");
+                    b.ToTable("SplitDayExercises");
                 });
 
             modelBuilder.Entity("CoachTracker.Api.Features.Storage.KeyValueEntry", b =>
@@ -219,50 +475,33 @@ namespace CoachTracker.api.Migrations
                     b.ToTable("KeyValues");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutExerciseLog", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.DailyWorkout", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("WorkoutSessionId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WorkoutSessionId");
-
-                    b.ToTable("WorkoutExerciseLogs");
-                });
-
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("Date");
 
-                    b.ToTable("WorkoutSessions");
+                    b.ToTable("DailyWorkouts");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutSetLog", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutSet", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("DailyWorkoutDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FormQuality")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LoggedAt")
                         .HasColumnType("TEXT");
@@ -279,28 +518,38 @@ namespace CoachTracker.api.Migrations
                     b.Property<double>("Weight")
                         .HasColumnType("REAL");
 
-                    b.Property<int>("WorkoutExerciseLogId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkoutExerciseLogId");
+                    b.HasIndex("DailyWorkoutDate");
 
-                    b.ToTable("WorkoutSetLogs");
+                    b.HasIndex("ExerciseId");
+
+                    b.ToTable("WorkoutSets");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlanDay", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.PlannedCalendarDay", b =>
                 {
-                    b.HasOne("CoachTracker.Api.Features.Plans.TrainingPlan", "TrainingPlan")
-                        .WithMany("Days")
-                        .HasForeignKey("TrainingPlanId")
+                    b.HasOne("CoachTracker.Api.Features.Splits.SplitDay", "SplitDay")
+                        .WithMany()
+                        .HasForeignKey("SplitDayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TrainingPlan");
+                    b.Navigation("SplitDay");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlanItem", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.SplitDay", b =>
+                {
+                    b.HasOne("CoachTracker.Api.Features.Splits.Split", "Split")
+                        .WithMany("Days")
+                        .HasForeignKey("SplitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Split");
+                });
+
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.SplitDayExercise", b =>
                 {
                     b.HasOne("CoachTracker.Api.Features.Exercises.Exercise", "Exercise")
                         .WithMany()
@@ -308,57 +557,49 @@ namespace CoachTracker.api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CoachTracker.Api.Features.Plans.TrainingPlanDay", "TrainingPlanDay")
-                        .WithMany("Items")
-                        .HasForeignKey("TrainingPlanDayId")
+                    b.HasOne("CoachTracker.Api.Features.Splits.SplitDay", "SplitDay")
+                        .WithMany("Exercises")
+                        .HasForeignKey("SplitDayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Exercise");
 
-                    b.Navigation("TrainingPlanDay");
+                    b.Navigation("SplitDay");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutExerciseLog", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutSet", b =>
                 {
-                    b.HasOne("CoachTracker.Api.Features.Workouts.WorkoutSession", "WorkoutSession")
-                        .WithMany("ExerciseLogs")
-                        .HasForeignKey("WorkoutSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WorkoutSession");
-                });
-
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutSetLog", b =>
-                {
-                    b.HasOne("CoachTracker.Api.Features.Workouts.WorkoutExerciseLog", "WorkoutExerciseLog")
+                    b.HasOne("CoachTracker.Api.Features.Workouts.DailyWorkout", "DailyWorkout")
                         .WithMany("Sets")
-                        .HasForeignKey("WorkoutExerciseLogId")
+                        .HasForeignKey("DailyWorkoutDate")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("WorkoutExerciseLog");
+                    b.HasOne("CoachTracker.Api.Features.Exercises.Exercise", "Exercise")
+                        .WithMany()
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DailyWorkout");
+
+                    b.Navigation("Exercise");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlan", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.Split", b =>
                 {
                     b.Navigation("Days");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Plans.TrainingPlanDay", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Splits.SplitDay", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Exercises");
                 });
 
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutExerciseLog", b =>
+            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.DailyWorkout", b =>
                 {
                     b.Navigation("Sets");
-                });
-
-            modelBuilder.Entity("CoachTracker.Api.Features.Workouts.WorkoutSession", b =>
-                {
-                    b.Navigation("ExerciseLogs");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,6 +5,24 @@ using CoachTracker.Api.Features.Exercises;
 
 namespace CoachTracker.Api.Features.Workouts;
 
+public class FinalizeWorkoutDto
+{
+    public DateOnly Date { get; set; }
+    public string? Notes { get; set; }
+    public List<FinalizeWorkoutSetDto> Sets { get; set; } = new();
+}
+
+public class FinalizeWorkoutSetDto
+{
+    public int? ExerciseId { get; set; }
+    public string? ExerciseName { get; set; }
+    public int SetNumber { get; set; }
+    public double Weight { get; set; }
+    public int Reps { get; set; }
+    public int? Rir { get; set; }
+    public string? FormQuality { get; set; }
+}
+
 [ApiController]
 [Route("api/workouts")]
 public class WorkoutsController : ControllerBase
@@ -16,175 +34,114 @@ public class WorkoutsController : ControllerBase
         _db = db;
     }
 
-    [HttpGet("today")]
-    public async Task<IActionResult> GetToday()
+    [HttpGet("{dateStr}")]
+    public async Task<IActionResult> GetWorkoutByDate(string dateStr)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (!DateOnly.TryParse(dateStr, out var date))
+            return BadRequest("Invalid date format. Use YYYY-MM-DD.");
 
-        var session = await _db.WorkoutSessions
-            .Include(s => s.ExerciseLogs)
-                .ThenInclude(el => el.Sets)
-            .Include(s => s.ExerciseLogs)
-                .ThenInclude(el => el.Exercise)
-            .FirstOrDefaultAsync(s => s.Date == today);
+        var workout = await _db.DailyWorkouts
+            .Include(dw => dw.Sets)
+            .ThenInclude(s => s.Exercise)
+            .FirstOrDefaultAsync(dw => dw.Date == date);
 
-        if (session == null)
+        if (workout == null)
         {
-            return Ok(new
-            {
-                date = today,
-                exercises = new List<object>()
-            });
+            return Ok(new { date, sets = new List<object>() });
         }
 
         var result = new
         {
-            sessionId = session.Id,
-            date = session.Date,
-            notes = session.Notes,
-            exercises = session.ExerciseLogs.Select(el => new
+            date = workout.Date,
+            notes = workout.Notes,
+            sets = workout.Sets.OrderBy(s => s.SetNumber).Select(s => new
             {
-                exerciseLogId = el.Id,
-                exerciseId = el.ExerciseId,
-                exerciseName = el.Exercise != null ? el.Exercise.Name : null,
-                sets = el.Sets
-                    .OrderBy(s => s.SetNumber)
-                    .Select(s => new
-                    {
-                        id = s.Id,
-                        setNumber = s.SetNumber,
-                        weight = s.Weight,
-                        reps = s.Reps,
-                        rir = s.Rir,
-                        loggedAt = s.LoggedAt
-                    })
-                    .ToList()
+                id = s.Id,
+                exerciseId = s.ExerciseId,
+                exerciseName = s.Exercise.Name,
+                setNumber = s.SetNumber,
+                weight = s.Weight,
+                reps = s.Reps,
+                rir = s.Rir,
+                formQuality = s.FormQuality
             }).ToList()
         };
 
         return Ok(result);
     }
 
-    [HttpPost("log-set")]
-    public async Task<IActionResult> LogSet([FromBody] LogSetDto dto)
+    [HttpPost("finalize")]
+    public async Task<IActionResult> FinalizeWorkout([FromBody] FinalizeWorkoutDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.ExerciseName))
+        // 1. Find or create the DailyWorkout
+        var workout = await _db.DailyWorkouts
+            .Include(dw => dw.Sets)
+            .FirstOrDefaultAsync(dw => dw.Date == dto.Date);
+
+        if (workout == null)
         {
-            return BadRequest(new { message = "ExerciseName is required." });
+            workout = new DailyWorkout { Date = dto.Date, Notes = dto.Notes };
+            _db.DailyWorkouts.Add(workout);
+        }
+        else
+        {
+            workout.Notes = dto.Notes;
+            // Overwrite sets entirely to reflect the exact state sent from frontend
+            _db.WorkoutSets.RemoveRange(workout.Sets);
+            workout.Sets.Clear();
         }
 
-        var trimmedName = dto.ExerciseName.Trim();
-        var exercise = await _db.Exercises
-            .FirstOrDefaultAsync(e => e.Name.ToLower() == trimmedName.ToLower());
-
-        if (exercise == null)
+        // 2. Process Sets
+        foreach (var setDto in dto.Sets)
         {
-            exercise = new Exercise
+            Exercise? exercise = null;
+
+            if (setDto.ExerciseId.HasValue)
             {
-                Name = trimmedName,
-                Group = "Unknown",
-                Category = "UserLogged"
-            };
-            _db.Exercises.Add(exercise);
-            await _db.SaveChangesAsync();
-        }
-
-        var today = DateOnly.FromDateTime(DateTime.Today);
-
-        var session = await _db.WorkoutSessions
-            .Include(s => s.ExerciseLogs)
-            .ThenInclude(e => e.Sets)
-            .FirstOrDefaultAsync(s => s.Date == today);
-
-        if (session == null)
-        {
-            session = new WorkoutSession
+                exercise = await _db.Exercises.FindAsync(setDto.ExerciseId.Value);
+            }
+            
+            // Auto-create custom exercises!
+            if (exercise == null && !string.IsNullOrWhiteSpace(setDto.ExerciseName))
             {
-                Date = today,
-                Notes = null,
-            };
-            _db.WorkoutSessions.Add(session);
-            await _db.SaveChangesAsync();
-        }
+                var trimmedName = setDto.ExerciseName.Trim();
+                // Check if we actually have one by name
+                exercise = await _db.Exercises.FirstOrDefaultAsync(e => e.Name.ToLower() == trimmedName.ToLower());
+                
+                if (exercise == null)
+                {
+                    exercise = new Exercise
+                    {
+                        Name = trimmedName,
+                        MovementPatternTag = "Custom",
+                        PrimaryMuscle = "Unknown",
+                        Equipment = "Unknown"
+                    };
+                    _db.Exercises.Add(exercise);
+                    await _db.SaveChangesAsync(); // Save immediately to generate Id
+                }
+            }
 
-        var exerciseLog = await _db.WorkoutExerciseLogs
-            .Include(e => e.Sets)
-            .FirstOrDefaultAsync(e =>
-                e.WorkoutSessionId == session.Id &&
-                e.ExerciseId == exercise.Id);
-
-        if (exerciseLog == null)
-        {
-            exerciseLog = new WorkoutExerciseLog
+            if (exercise != null)
             {
-                WorkoutSessionId = session.Id,
-                ExerciseId = exercise.Id,
-            };
-
-            _db.WorkoutExerciseLogs.Add(exerciseLog);
-            await _db.SaveChangesAsync();
-        }
-
-        var nextSetNumber = exerciseLog.Sets.Any()
-            ? exerciseLog.Sets.Max(s => s.SetNumber) + 1
-            : 1;
-
-        var setLog = new WorkoutSetLog
-        {
-            WorkoutExerciseLogId = exerciseLog.Id,
-            SetNumber = nextSetNumber,
-            Weight = dto.Weight,
-            Reps = dto.Reps,
-            Rir = dto.Rir,
-            LoggedAt = DateTime.UtcNow
-        };
-
-        _db.WorkoutSetLogs.Add(setLog);
-        await _db.SaveChangesAsync();
-
-        return Ok(new
-        {
-            message = "set saved",
-            sessionId = session.Id,
-            exerciseLogId = exerciseLog.Id,
-            setId= setLog.Id,
-            setNumber = setLog.SetNumber,
-            weight = setLog.Weight,
-            reps = setLog.Reps,
-            rir = setLog.Rir
-        });
-    }
-
-    [HttpDelete("sets/{setId:int}")]
-    public async Task<IActionResult> DeleteSet(int setId)
-    {
-        var set = await _db.WorkoutSetLogs
-            .Include(s => s.WorkoutExerciseLog)
-            .ThenInclude(e => e.Sets)
-            .Include(s => s.WorkoutExerciseLog.WorkoutSession)
-            .ThenInclude(ws => ws.ExerciseLogs)
-            .FirstOrDefaultAsync(s => s.Id == setId);
-
-        if (set == null) return NotFound();
-
-        var exerciseLog = set.WorkoutExerciseLog;
-        var session = exerciseLog.WorkoutSession;
-
-        _db.WorkoutSetLogs.Remove(set);
-
-        // If no more sets for this exercise, remove exercise log
-        if (exerciseLog.Sets.Count <= 1)
-        {
-            _db.WorkoutExerciseLogs.Remove(exerciseLog);
-        }
-
-        // If session has no more exercise logs, remove the session
-        if (session.ExerciseLogs.Count <= 1 && exerciseLog.Sets.Count <= 1)
-        {
-            _db.WorkoutSessions.Remove(session);
+                var set = new WorkoutSet
+                {
+                    DailyWorkoutDate = workout.Date,
+                    ExerciseId = exercise.Id,
+                    SetNumber = setDto.SetNumber,
+                    Weight = setDto.Weight,
+                    Reps = setDto.Reps,
+                    Rir = setDto.Rir,
+                    FormQuality = setDto.FormQuality,
+                    LoggedAt = DateTime.UtcNow
+                };
+                workout.Sets.Add(set);
+                _db.WorkoutSets.Add(set);
+            }
         }
 
         await _db.SaveChangesAsync();
-        return Ok(new { ok = true });
+
+        return Ok(new { message = "Workout finalized perfectly." });
     }
 }
