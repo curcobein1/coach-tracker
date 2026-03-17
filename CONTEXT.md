@@ -1,4 +1,4 @@
-# Coach Tracker AI Context
+# Coach Tracker Context
 
 **Date Updated:** 2026-03-16
 
@@ -34,3 +34,12 @@ This is the most critical shift.
 
 ## Where To Go Next
 Everything currently functions end-to-end perfectly. You can spin up both `dotnet run` (port 5106) and `ng serve` (port 4200) simultaneously to verify. The user will likely want to build out Historical tracking charts, an interactive Calendar view on the frontend to visualize past `DailyWorkout` records, or Nutrition aggregations next.
+
+---
+
+## 4. Nutrition & Tailwind UI (March 2026)
+
+- **USDA Search Flow:** Frontend `NutritionComponent` calls `FoodApiService.searchFoods()` → `POST /api/foods/search` → `FoodsController` → `UsdaFoodService.SearchFoodsAsync`, which proxies to USDA `foods/search`. The search DTO now includes **headline macros only** (`Calories`, `Protein`, `Carbs`, `Fat`) so the results list can show kcal/macros without a detail call; all other fields (fiber, sugar, sodium, potassium, micronutrients) live in `FoodDetailDto.Summary` and `FoodDetailDto.Micronutrients`.
+- **Food Detail Flow:** Clicking a result calls `FoodApiService.getFoodDetail(fdcId)` → `GET /api/foods/{fdcId}` → `UsdaFoodService.GetFoodDetailAsync` / `MapFoodDetail`. This builds a `FoodDetailDto` with a `Summary` (including `Potassium`) and grouped micronutrients using `NutrientMapper`. The Nutrition page shows this in the right‑hand “Food details” tile.
+- **Nutrition Logging & Usuals:** `NutritionStore` talks to `NutritionLogController` (`/api/nutrition/...`) to persist logged foods per `dayKey` and maintain a `NutritionUsuals` table. The Nutrition page can add the current USDA selection to today’s log or star it as a “Usual”; usuals are rendered as a grid of quick‑add pills under the details tile.
+- **Tailwind UI:** PrimeNG is being phased out in favor of TailwindCSS 3. The Nutrition page is now a two‑column Tailwind layout (results on the left; food details and usuals stacked on the right) with a sharp, high‑contrast aesthetic that can be iterated toward a TempleOS‑style look across the app.

@@ -14,7 +14,6 @@ export class NutritionStore {
   }
 
   getDay(date = todayKey()): DayNutritionLog {
-    // return cached, kick off refresh
     const cached = this.dayCache.get(date);
     if (!cached) {
       const empty = { date, foods: [] as any[] };

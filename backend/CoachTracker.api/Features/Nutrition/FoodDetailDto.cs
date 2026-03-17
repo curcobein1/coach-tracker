@@ -22,6 +22,7 @@ public class FoodSummaryDto
     public double? Fiber { get; set; }
     public double? Sugar { get; set; }
     public double? Sodium { get; set; }
+    public double? Potassium { get; set; }
 }
 
 public class FoodMicronutrientsDto

@@ -48,12 +48,20 @@ public class UsdaFoodService
         {
             Query = query,
             PageSize = pageSize,
-            Foods = usda.Foods.Select(f => new FoodSearchItemDto
+            Foods = usda.Foods.Select(f =>
             {
-                FdcId = f.FdcId,
-                Description = f.Description,
-                FoodCategory = GetFoodCategoryText(f.FoodCategory),
-                BrandName = f.BrandName
+                // Include only headline macros for search cards; full summary stays in FoodDetail
+                return new FoodSearchItemDto
+                {
+                    FdcId       = f.FdcId,
+                    Description = f.Description,
+                    FoodCategory = GetFoodCategoryText(f.FoodCategory),
+                    BrandName   = f.BrandName,
+                    Calories    = GetNutrientValue(f, "Energy"),
+                    Protein     = GetNutrientValue(f, "Protein"),
+                    Carbs       = GetNutrientValue(f, "Carbohydrate, by difference"),
+                    Fat         = GetNutrientValue(f, "Total lipid (fat)")
+                };
             }).ToList()
         };
     }
@@ -128,7 +136,8 @@ public class UsdaFoodService
             Fat = GetNutrientValue(food, "Total lipid (fat)"),
             Fiber = GetNutrientValue(food, "Fiber, total dietary"),
             Sugar = GetNutrientValue(food, "Total Sugars"),
-            Sodium = GetNutrientValue(food, "Sodium, Na")
+            Sodium = GetNutrientValue(food, "Sodium, Na"),
+            Potassium = GetNutrientValue(food, "Potassium, K")
         };
 
         foreach (var nutrient in food.FoodNutrients ?? new())

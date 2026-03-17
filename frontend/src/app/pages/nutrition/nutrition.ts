@@ -32,6 +32,10 @@ export class NutritionComponent {
 
   grams = 100;
 
+  get usuals(): UsualFood[] {
+    return this.nutrition.getUsuals();
+  }
+
   searchFoods() {
     const trimmed = this.query.trim();
 
@@ -154,6 +158,26 @@ export class NutritionComponent {
       c: scale(s.carbs ?? undefined),
       f: scale(s.fat ?? undefined),
     });
+  }
+
+  useUsual(u: UsualFood): void {
+    const scale = (grams: number, base: number) =>
+      (base ?? 0) * (grams / (u.grams || 100));
+
+    const g = u.grams || 100;
+
+    this.nutrition.addFood(
+      {
+        fdcId: u.fdcId,
+        name: u.name,
+        grams: g,
+        kcal: scale(g, u.kcal),
+        p: scale(g, u.p),
+        c: scale(g, u.c),
+        f: scale(g, u.f),
+      },
+      undefined
+    );
   }
 }
 

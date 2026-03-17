@@ -16,9 +16,6 @@ export interface FoodSearchItem {
   protein?: number | null;
   carbs?: number | null;
   fat?: number | null;
-  fiber?: number | null;
-  sugar?: number | null;
-  sodium?: number | null;
 }
 
 export interface FoodSearchResponse {
@@ -42,6 +39,7 @@ export interface FoodSummary {
   fiber?: number | null;
   sugar?: number | null;
   sodium?: number | null;
+  potassium?: number | null;
 }
 
 export interface FoodDetail {

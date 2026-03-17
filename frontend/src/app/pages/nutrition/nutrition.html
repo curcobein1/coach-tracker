@@ -1,155 +1,243 @@
-<section class="nutrition-page">
-  <div class="search-bar">
-    <input
-      type="text"
-      [(ngModel)]="query"
-      placeholder="Search foods..."
-      (keyup.enter)="searchFoods()"
-    />
-    <button type="button" (click)="searchFoods()">Search</button>
+<section class="min-h-screen bg-blue-600 text-white-100 px-6 py-4 flex flex-col gap-4">
+  <!-- Top bar: search + status -->
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="flex-1 min-w-[220px]">
+      <input
+        type="text"
+        [(ngModel)]="query"
+        placeholder="Search foods..."
+        (keyup.enter)="searchFoods()"
+        class="w-full xl border border-white-600 bg-blue-600/70 px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60"
+      />
+    </div>
+    <button
+      type="button"
+      (click)="searchFoods()"
+      class="inline-flex items-center xl bg-transparent-500 px-4 py-2 text-sm font-medium text-white-950 hover:bg-sky-400 transition"
+    >
+      Search USDA
+    </button>
+    <span *ngIf="isSearching" class="text-xs text-white-400">Searching…</span>
   </div>
 
   @if (error) {
-  <div class="error">
+  <div class="rounded-xl border border-red-700 bg-red-950/40 px-3 py-2 text-sm text-red-200">
     {{ error }}
   </div>
   }
 
-  <div class="nutrition-layout">
-    <div class="results-panel">
-      <h3>Results</h3>
+  <!-- Two-column grid: results (left), details + usuals (right) -->
+  <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1.6fr)] gap-4 flex-1 items-start">
+    <!-- Left column: results -->
+    <div class="border border-white-500 bg-transparent px-3 py-2 text-xs">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-slate-100 tracking-tight">Results</h3>
+        <span class="text-[11px] text-white-400">
+          {{ results.length }} item{{ results.length === 1 ? '' : 's' }}
+        </span>
+      </div>
 
-      @if (isSearching) {
-      <div>Searching...</div>
+      @if (!isSearching && results.length === 0 && !error) {
+      <div class="text-xs text-white-500">Type a query and hit Enter to search USDA.</div>
       }
 
-      @if (!isSearching && results.length === 0) {
-      <div>No foods yet.</div>
-      }
+      <div class="mt-2 overflow-y-auto pr-1 space-y-2">
+        @for (food of results; track food.fdcId) {
+        <button
+          type="button"
+          class="w-full 2xl border border-white-800/80 bg-transparent-950/80 px-3 py-2 text-left text-xs hover:border-sky-500 hover:bg-indigo-600 transition"
+          (click)="selectFood(food)"
+        >
+          <div class="flex justify-between gap-2">
+            <div class="font-medium text-slate-100 line-clamp-2">
+              {{ food.description }}
+            </div>
+            @if (food.foodCategory) {
+            <span class="border border-white-700 bg-transparent px-1 py-0.5 text-[10px]">
+              {{ food.foodCategory }}
+            </span>
+            }
+          </div>
 
-      @for (food of results; track food.fdcId) {
-      <button
-        type="button"
-        class="food-card"
-        (click)="selectFood(food)"
-      >
-        <div class="food-title">{{ food.description }}</div>
-
-        @if (food.foodCategory) {
-        <div class="food-subtitle">{{ food.foodCategory }}</div>
+          <div class="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-300">
+            <span class="border border-white-700 bg-transparent px-1 py-0.5 text-[10px]">
+              {{ food.calories ?? '-' }} kcal
+            </span>
+            <span class="border border-white-700 bg-transparent px-1 py-0.5 text-[10px]">
+              P {{ food.protein ?? '-' }}
+            </span>
+            <span class="border border-white-700 bg-transparent px-1 py-0.5 text-[10px]">
+              C {{ food.carbs ?? '-' }}
+            </span>
+            <span class="border border-white-700 bg-transparent px-1 py-0.5 text-[10px]">
+              F {{ food.fat ?? '-' }}
+            </span>
+          </div>
+        </button>
         }
-
-        <div class="food-macros">
-          <span>{{ food.calories ?? '-' }} kcal</span>
-          <span>P {{ food.protein ?? '-' }}</span>
-          <span>C {{ food.carbs ?? '-' }}</span>
-          <span>F {{ food.fat ?? '-' }}</span>
-        </div>
-
-        <div class="food-secondary">
-          <span>Fiber {{ food.fiber ?? '-' }}</span>
-          <span>Sugar {{ food.sugar ?? '-' }}</span>
-          <span>Sodium {{ food.sodium ?? '-' }}</span>
-        </div>
-      </button>
-      }
+      </div>
     </div>
 
-    <div class="detail-panel">
-      <h3>Food Details</h3>
+    <!-- Right column: details on top, usuals below -->
+    <div class="flex flex-col gap-4">
+      <!-- Food details -->
+      <div class="border border-white-500 bg-transparent px-3 py-2 text-xs">
+        <h3 class="text-sm font-semibold text-slate-100 mb-2 tracking-tight">Food details</h3>
 
-      @if (isLoadingDetail) {
-      <div>Loading details...</div>
-      }
-
-      @if (!isLoadingDetail && !selectedFood) {
-      <div>Select a food to view details.</div>
-      }
-
-      @if (selectedFood) {
-      <div class="detail-card">
-        <div class="detail-header-row">
-          <h4>{{ selectedFood.description }}</h4>
-          <button
-            type="button"
-            class="star-btn"
-            (click)="toggleSelectedUsual()"
-          >
-            {{ isSelectedUsual ? '★' : '☆' }}
-          </button>
-        </div>
-
-        @if (selectedFood.foodCategory) {
-        <div class="food-subtitle">{{ selectedFood.foodCategory }}</div>
+        @if (isLoadingDetail) {
+        <div class="text-xs text-slate-400">Loading details…</div>
         }
 
-        <div class="summary-grid">
-          <div>Calories: {{ selectedFood.summary.calories ?? '-' }} kcal</div>
-          <div>Protein: {{ selectedFood.summary.protein ?? '-' }} g</div>
-          <div>Carbs: {{ selectedFood.summary.carbs ?? '-' }} g</div>
-          <div>Fat: {{ selectedFood.summary.fat ?? '-' }} g</div>
-          <div>Fiber: {{ selectedFood.summary.fiber ?? '-' }} g</div>
-          <div>Sugar: {{ selectedFood.summary.sugar ?? '-' }} g</div>
-          <div>Sodium: {{ selectedFood.summary.sodium ?? '-' }} mg</div>
-        </div>
-
-        <div class="log-controls">
-          <label>Grams:</label>
-          <input type="number" [(ngModel)]="grams" min="1" />
-          <button type="button" (click)="addSelectedToToday()">
-            Add to today
-          </button>
-        </div>
-
-        @if (selectedFood.micronutrients.vitamins.length > 0) {
-        <div class="nutrient-section">
-          <h5>Vitamins</h5>
-          @for (item of selectedFood.micronutrients.vitamins; track trackByNutrientKey($index, item)) {
-          <div class="nutrient-row">
-            <span>{{ item.label }}</span>
-            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
-          </div>
-          }
-        </div>
+        @if (!isLoadingDetail && !selectedFood) {
+        <div class="text-xs text-white-500">Select a food from the left to see macros and micros.</div>
         }
 
-        @if (selectedFood.micronutrients.majorMinerals.length > 0) {
-        <div class="nutrient-section">
-          <h5>Major Minerals</h5>
-          @for (item of selectedFood.micronutrients.vitamins; track item.key) {
-          <div class="nutrient-row">
-            <span>{{ item.label }}</span>
-            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+        @if (selectedFood) {
+        <div class="space-y-3 text-xs">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h4 class="text-sm font-semibold text-slate-100">
+                {{ selectedFood.description }}
+              </h4>
+              @if (selectedFood.foodCategory) {
+              <div class="mt-0.5 text-[11px] text-slate-400">
+                {{ selectedFood.foodCategory }}
+              </div>
+              }
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-base"
+              (click)="toggleSelectedUsual()"
+            >
+              {{ isSelectedUsual ? '★' : '☆' }}
+            </button>
           </div>
-          }
-        </div>
-        }
 
-        @if (selectedFood.micronutrients.traceMinerals.length > 0) {
-        <div class="nutrient-section">
-          <h5>Trace Minerals</h5>
-          @for (item of selectedFood.micronutrients.traceMinerals; track trackByNutrientKey($index, item)) {
-          <div class="nutrient-row">
-            <span>{{ item.label }}</span>
-            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+          <div class="grid grid-cols-2 gap-2 rounded-lg bg-slate-950/60 p-3">
+            <div>Calories: <span class="font-medium">{{ selectedFood.summary.calories ?? '-' }}</span> kcal</div>
+            <div>Protein: <span class="font-medium">{{ selectedFood.summary.protein ?? '-' }}</span> g</div>
+            <div>Carbs: <span class="font-medium">{{ selectedFood.summary.carbs ?? '-' }}</span> g</div>
+            <div>Fat: <span class="font-medium">{{ selectedFood.summary.fat ?? '-' }}</span> g</div>
+            <div>Fiber: <span class="font-medium">{{ selectedFood.summary.fiber ?? '-' }}</span> g</div>
+            <div>Sugar: <span class="font-medium">{{ selectedFood.summary.sugar ?? '-' }}</span> g</div>
+            <div>Sodium: <span class="font-medium">{{ selectedFood.summary.sodium ?? '-' }}</span> mg</div>
+            <div>Potassium: <span class="font-medium">{{ selectedFood.summary.potassium ?? '-' }}</span> mg</div>
           </div>
-          }
-        </div>
-        }
 
-        @if (selectedFood.other.length > 0) {
-        <div class="nutrient-section">
-          <h5>Other</h5>
-          @for (item of selectedFood.other; track trackByNutrientKey($index, item)) {
-          <div class="nutrient-row">
-            <span>{{ item.label }}</span>
-            <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+          <div class="flex items-center gap-2">
+            <label class="text-[11px] text-slate-400">Grams</label>
+            <input
+              type="number"
+              [(ngModel)]="grams"
+              min="1"
+              class="w-24 rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/70"
+            />
+            <button
+              type="button"
+              (click)="addSelectedToToday()"
+              class="inline-flex items-center rounded-md bg-teal-500 px-3 py-1.5 text-xs font-medium text-emerald-950 hover:bg-emerald-400 transition"
+            >
+              Add to today
+            </button>
           </div>
-          }
+
+          <!-- Micronutrients: all visible, no scrollbars -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <h5 class="mb-1 text-[11px] font-semibold text-slate-300">Vitamins</h5>
+              <div class="space-y-1">
+                @for (item of selectedFood.micronutrients.vitamins; track trackByNutrientKey($index, item)) {
+                <div class="flex justify-between text-[11px] text-slate-300">
+                  <span>{{ item.label }}</span>
+                  <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+                </div>
+                }
+              </div>
+            </div>
+
+            <div>
+              <h5 class="mb-1 text-[11px] font-semibold text-slate-300">Major minerals</h5>
+              <div class="space-y-1">
+                @for (item of selectedFood.micronutrients.majorMinerals; track trackByNutrientKey($index, item)) {
+                <div class="flex justify-between text-[11px] text-slate-300">
+                  <span>{{ item.label }}</span>
+                  <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+                </div>
+                }
+              </div>
+            </div>
+
+            <div>
+              <h5 class="mb-1 text-[11px] font-semibold text-slate-300">Trace minerals</h5>
+              <div class="space-y-1">
+                @for (item of selectedFood.micronutrients.traceMinerals; track trackByNutrientKey($index, item)) {
+                <div class="flex justify-between text-[11px] text-slate-300">
+                  <span>{{ item.label }}</span>
+                  <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+                </div>
+                }
+              </div>
+            </div>
+
+            <div>
+              <h5 class="mb-1 text-[11px] font-semibold text-slate-300">Other</h5>
+              <div class="space-y-1">
+                @for (item of selectedFood.other; track trackByNutrientKey($index, item)) {
+                <div class="flex justify-between text-[11px] text-slate-300">
+                  <span>{{ item.label }}</span>
+                  <span>{{ item.value ?? '-' }} {{ item.unit }}</span>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
         </div>
         }
       </div>
-      }
+
+      <!-- Usual foods under details -->
+      <div class="border border-white-500 bg-transparent px-3 py-2 text-xs">
+        <div class="mb-1 flex items-center justify_between">
+          <h4 class="text-xs font-semibold text-slate-200">Usuals</h4>
+          <span class="text-[10px] text-white-500">
+            {{ usuals.length }} saved
+          </span>
+        </div>
+        @if (usuals.length === 0) {
+        <div class="text-[11px] text-white-500">
+          Toggle the star on a food to save it here for quick reuse.
+        </div>
+        }
+        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          @for (u of usuals; track u.fdcId) {
+          <button
+            type="button"
+            class="rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 text-left text-[11px] hover:border-emerald-500 hover:bg-emerald-950/30 transition"
+            (click)="useUsual(u)"
+          >
+            <div class="font-medium text-slate-100 line-clamp-2">{{ u.name }}</div>
+            <div class="mt-1 flex flex-wrap gap-1 text-[10px] text-slate-300">
+              <span class="rounded bg-slate-800/70 px-1.5 py-0.5">
+                {{ u.grams }} g
+              </span>
+              <span class="rounded bg-slate-800/70 px-1.5 py-0.5">
+                {{ u.kcal }} kcal
+              </span>
+              <span class="rounded bg-slate-800/70 px-1.5 py-0.5">
+                P {{ u.p }}
+              </span>
+              <span class="rounded bg-slate-800/70 px-1.5 py-0.5">
+                C {{ u.c }}
+              </span>
+              <span class="rounded bg-slate-800/70 px-1.5 py-0.5">
+                F {{ u.f }}
+              </span>
+            </div>
+          </button>
+          }
+        </div>
+      </div>
     </div>
   </div>
 </section>
