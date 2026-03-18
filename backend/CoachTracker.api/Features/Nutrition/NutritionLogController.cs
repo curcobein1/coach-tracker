@@ -22,7 +22,7 @@ public class NutritionLogController : ControllerBase
             .Where(f => f.DayKey == dayKey)
             .OrderByDescending(f => f.LoggedAtUtc)
             .Select(f => new NutritionFoodLogDto(
-                f.Id, f.DayKey, f.FdcId, f.Name, f.Grams, f.Kcal, f.P, f.C, f.F, f.LoggedAtUtc
+                f.Id, f.DayKey, f.FdcId, f.Name, f.Grams, f.Kcal, f.P, f.C, f.F, f.MicrosJson, f.LoggedAtUtc
             ))
             .ToListAsync();
 
@@ -46,6 +46,7 @@ public class NutritionLogController : ControllerBase
             P = req.P,
             C = req.C,
             F = req.F,
+            MicrosJson = req.MicrosJson,
             LoggedAtUtc = DateTime.UtcNow
         };
 
@@ -53,7 +54,7 @@ public class NutritionLogController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(new NutritionFoodLogDto(
-            entity.Id, entity.DayKey, entity.FdcId, entity.Name, entity.Grams, entity.Kcal, entity.P, entity.C, entity.F, entity.LoggedAtUtc
+            entity.Id, entity.DayKey, entity.FdcId, entity.Name, entity.Grams, entity.Kcal, entity.P, entity.C, entity.F, entity.MicrosJson, entity.LoggedAtUtc
         ));
     }
 

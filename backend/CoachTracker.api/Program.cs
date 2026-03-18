@@ -44,6 +44,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+    await EnsureNutritionMicrosColumnAsync(db);
     await SeedSplitDayTemplatesAsync(db);
 }
 
@@ -63,6 +64,20 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
+
+static async Task EnsureNutritionMicrosColumnAsync(AppDbContext db)
+{
+    // We can't always run EF migrations while the API is already running (locked binaries),
+    // so ensure the column exists at runtime as a lightweight, safe schema patch.
+    try
+    {
+        await db.Database.ExecuteSqlRawAsync("ALTER TABLE NutritionFoodLogs ADD COLUMN MicrosJson TEXT NULL;");
+    }
+    catch
+    {
+        // Column likely already exists; ignore.
+    }
+}
 
 static async Task SeedSplitDayTemplatesAsync(AppDbContext db)
 {

@@ -56,4 +56,15 @@ public class CalendarController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok(new { date = date, splitDayId });
     }
+
+    [HttpDelete("day/{date}")]
+    public async Task<IActionResult> ClearDay(string date)
+    {
+        var dayKey = DateOnly.Parse(date);
+        var existing = await _db.PlannedCalendarDays.FirstOrDefaultAsync(p => p.Date == dayKey);
+        if (existing == null) return Ok(new { date, cleared = true });
+        _db.PlannedCalendarDays.Remove(existing);
+        await _db.SaveChangesAsync();
+        return Ok(new { date, cleared = true });
+    }
 }

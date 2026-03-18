@@ -23,4 +23,16 @@ export class ExercisesApiService {
   list(): Observable<ExerciseDto[]> {
     return this.http.get<ExerciseDto[]>(this.base);
   }
+
+  create(exercise: Partial<ExerciseDto> & { name: string }): Observable<ExerciseDto> {
+    return this.http.post<ExerciseDto>(this.base, exercise);
+  }
+
+  update(id: number, exercise: Partial<ExerciseDto> & { name: string }): Observable<ExerciseDto> {
+    return this.http.put<ExerciseDto>(`${this.base}/${id}`, exercise);
+  }
+
+  delete(id: number): Observable<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${this.base}/${id}`);
+  }
 }

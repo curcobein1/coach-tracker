@@ -1,6 +1,7 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import {
   FoodApiService,
   FoodSearchItem,
@@ -20,6 +21,14 @@ export class NutritionComponent {
   private foodApi = inject(FoodApiService);
   private cdr = inject(ChangeDetectorRef);
   private nutrition = inject(NutritionStore);
+
+  constructor() {
+    effect(() => {
+      // Ensuring the view refresh when NutritionStore signals update
+      this.nutrition.usuals();
+      this.cdr.markForCheck();
+    });
+  }
 
   query = '';
   results: FoodSearchItem[] = [];
@@ -81,32 +90,42 @@ export class NutritionComponent {
     this.error = '';
     this.cdr.detectChanges();
 
-    this.foodApi.getFoodDetail(food.fdcId).subscribe({
-      next: (detail) => {
-        this.selectedFood = { ...detail };
-        this.isLoadingDetail = false;
-        this.grams = 100;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('food detail failed', err);
+    this.foodApi
+      .getFoodDetail(food.fdcId)
+      .pipe(
+        finalize(() => {
+          this.isLoadingDetail = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (detail) => {
+          if (!detail) {
+            this.selectedFood = null;
+            this.error = 'Food details could not be loaded';
+            return;
+          }
+          this.selectedFood = { ...detail };
+          this.grams = 100;
+        },
+        error: (err) => {
+          console.error('food detail failed', err);
 
-        if(err.status === 404){
-          this.error = 'Details are not available for this food item.';
-        } else {
-          this.error ='Food details could not be loaded';
+          if (err.status === 404) {
+            this.error = 'Details are not available for this food item.';
+          } else {
+            this.error = 'Food details could not be loaded';
           }
 
-        this.selectedFood = null;
-        this.isLoadingDetail = false;
-        this.cdr.detectChanges();
-      },
-    });
+          this.selectedFood = null;
+        },
+      });
   }
 
   toggleResultUsual(food: FoodSearchItem): void {
     if (this.isUsualFood(food)) {
       this.nutrition.removeUsual(food.fdcId);
+      this.cdr.markForCheck();
       return;
     }
 
@@ -122,6 +141,7 @@ export class NutritionComponent {
       c: scale(food.carbs),
       f: scale(food.fat),
     });
+    this.cdr.markForCheck();
   }
 
   trackByFoodId(_: number, item: FoodSearchItem) {
@@ -145,6 +165,28 @@ export class NutritionComponent {
 
     const scale = (v?: number | null) => (v ?? 0) * (g / 100);
 
+    const micros: Record<string, { label: string; unit: string; value: number }> = {};
+    const addMicro = (key: string, label: string, unit: string, value?: number | null) => {
+      const v = scale(value);
+      if (!Number.isFinite(v) || v === 0) return;
+      micros[key] = { label, unit, value: v };
+    };
+
+    for (const item of (this.selectedFood.micronutrients?.vitamins ?? [])) {
+      addMicro(item.key, item.label, item.unit, item.value);
+    }
+    for (const item of (this.selectedFood.micronutrients?.majorMinerals ?? [])) {
+      addMicro(item.key, item.label, item.unit, item.value);
+    }
+    for (const item of (this.selectedFood.micronutrients?.traceMinerals ?? [])) {
+      addMicro(item.key, item.label, item.unit, item.value);
+    }
+
+    // Helpful "other" targets we commonly care about
+    addMicro('fiber', 'Fiber', 'g', s.fiber ?? undefined);
+    addMicro('sodium', 'Sodium', 'mg', s.sodium ?? undefined);
+    addMicro('potassium', 'Potassium', 'mg', s.potassium ?? undefined);
+
     this.nutrition.addFood(
       {
         fdcId: this.selectedFood.fdcId,
@@ -154,9 +196,11 @@ export class NutritionComponent {
         p: scale(s.protein ?? undefined),
         c: scale(s.carbs ?? undefined),
         f: scale(s.fat ?? undefined),
+        micros,
       },
       undefined
     );
+    this.cdr.markForCheck();
   }
 
   toggleSelectedUsual(): void {
@@ -166,6 +210,7 @@ export class NutritionComponent {
 
     if (current.some((u) => u.fdcId === id)) {
       this.nutrition.removeUsual(id);
+      this.cdr.markForCheck();
       return;
     }
 
@@ -182,6 +227,7 @@ export class NutritionComponent {
       c: scale(s.carbs ?? undefined),
       f: scale(s.fat ?? undefined),
     });
+    this.cdr.markForCheck();
   }
 
   useUsual(u: UsualFood): void {
@@ -202,10 +248,12 @@ export class NutritionComponent {
       },
       undefined
     );
+    this.cdr.markForCheck();
   }
 
   toggleUsualFromList(u: UsualFood): void {
     this.nutrition.removeUsual(u.fdcId);
+    this.cdr.markForCheck();
   }
 }
 

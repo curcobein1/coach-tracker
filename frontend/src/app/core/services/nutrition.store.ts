@@ -35,6 +35,11 @@ export class NutritionStore {
           p: f.p,
           c: f.c,
           f: f.f,
+          micros: (() => {
+            const raw = (f as any).microsJson as string | null | undefined;
+            if (!raw) return null;
+            try { return JSON.parse(raw) as any; } catch { return null; }
+          })(),
           at: f.id, // map backend id into 'at' for existing UI delete calls
         }));
         this.dayCache.set(date, { date, foods });
@@ -53,6 +58,7 @@ export class NutritionStore {
       p: food.p,
       c: food.c,
       f: food.f,
+      microsJson: food.micros ? JSON.stringify(food.micros) : null,
     }).subscribe({
       next: () => this.refreshDay(date),
       error: (e) => console.error('Failed to add food', e),

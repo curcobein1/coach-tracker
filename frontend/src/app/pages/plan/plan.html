@@ -3,48 +3,185 @@
     <h2>Plan</h2>
   </div>
 
-  <p-card>
-    <div class="field">
-      <label class="label mb-2 block">Split</label>
-      <p-select 
-        [options]="splits" 
-        [(ngModel)]="selectedSplit" 
-        optionLabel="name" 
-        placeholder="-- Select split --" 
-        (onChange)="onSelectSplit($event.value?.id)">
-      </p-select>
-    </div>
-  </p-card>
-
   <div *ngIf="loading" class="muted mt-4">Loading...</div>
 
-  <p-card *ngIf="selectedSplit && !loading" styleClass="mt-4">
-    <div class="label mb-2">Days</div>
-    <div class="flex flex-wrap gap-2">
-      <p-button
-        *ngFor="let d of selectedSplit.days"
-        [label]="d.name + ' (' + d.exercises.length + ')'"
-        [severity]="selectedDay?.id === d.id ? 'primary' : 'secondary'"
-        (onClick)="selectDay(d)">
-      </p-button>
-    </div>
+  <div class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)_420px] xl:grid-cols-[240px_minmax(0,1fr)_520px]">
+    <!-- LEFT COLUMN: splits + days -->
+    <section class="border border-white/10 bg-white/5 p-4">
+      <div class="label mb-2">Splits</div>
+      <select
+        class="w-full border border-white/10 bg-white/90 px-3 py-2 text-sm text-black outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/40"
+        [ngModel]="selectedSplit?.id ?? null"
+        (ngModelChange)="onSelectSplit($event)"
+      >
+        <option [ngValue]="null">see the splits</option>
+        <option *ngFor="let s of splits" [ngValue]="s.id">{{ s.name }}</option>
+      </select>
 
-    <div *ngIf="selectedDay" class="mt-4">
-      <p-button label="Assign this day to today" (onClick)="assignDayToToday()" severity="success"></p-button>
-      <div class="sub mt-2">Today is {{ todayKey }}. This sets what shows on the Today page.</div>
-
-      <div class="mt-4">
-        <div *ngIf="selectedDay.exercises.length === 0" class="muted">No exercises on this day. Add from exercise library (coming soon).</div>
-        <div *ngFor="let ex of selectedDay.exercises" class="item">
-          <div class="left">
-            <span>{{ ex.exerciseName }}</span>
-            <span class="meta">{{ ex.targetSets }} sets · {{ ex.targetRepRange || '-' }}</span>
-          </div>
-          <p-button icon="pi pi-times" severity="danger" [rounded]="true" [text]="true" (onClick)="removeExercise(ex)"></p-button>
+      <div *ngIf="selectedSplit" class="mt-4">
+        <div class="label mb-2">Days</div>
+        <div class="grid grid-cols-1 gap-2">
+          <button
+            *ngFor="let d of selectedSplit.days"
+            type="button"
+            (click)="selectDay(d)"
+            class="flex w-full items-center justify-between border px-3 py-2 text-sm font-semibold transition"
+            [ngClass]="selectedDay?.id === d.id
+              ? 'border-sky-300/40 bg-sky-500/15 text-sky-100'
+              : 'border-white/10 bg-black/20 text-white/80 hover:bg-white/5'"
+          >
+            <span class="truncate">{{ d.name }}</span>
+            <span class="text-xs opacity-70">{{ d.exercises.length }}</span>
+          </button>
         </div>
       </div>
+    </section>
+
+    <!-- MIDDLE COLUMN: day exercises -->
+    <section class="border border-white/10 bg-white/5 p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="label">Day</div>
+          <div class="sub mt-1" *ngIf="!selectedDay">Pick a day on the left.</div>
+          <div class="t" *ngIf="selectedDay">{{ selectedDay.name }}</div>
+        </div>
+        <button
+          *ngIf="selectedDay"
+          type="button"
+          (click)="chooseThisSplit()"
+          class="inline-flex items-center border border-sky-300/30 bg-sky-500/10 px-4 py-2 text-sm font-semibold text-sky-100 hover:bg-sky-500/20"
+        >
+          Choose this split
+        </button>
+      </div>
+
+      <div *ngIf="selectedDay" class="mt-4">
+        <div class="label mb-2">Exercises in day</div>
+        <div *ngIf="selectedDay.exercises.length === 0" class="muted">No exercises on this day.</div>
+        <div class="overflow-x-auto" *ngIf="selectedDay.exercises.length > 0">
+          <table class="w-full text-left text-sm">
+            <thead class="text-white/70">
+              <tr class="border-b border-white/10">
+                <th class="py-2 pr-3 w-10">#</th>
+                <th class="py-2 pr-3">Exercise</th>
+                <th class="py-2 pr-3 w-28">Sets</th>
+                <th class="py-2 pr-3 w-28">Reps</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ex of selectedDay.exercises; let i = index" class="border-b border-white/5">
+                <td class="py-2 pr-3 text-white/60">{{ i + 1 }}</td>
+                <td class="py-2 pr-3">{{ ex.exerciseName }}</td>
+                <td class="py-2 pr-3 text-white/70">{{ ex.targetSets }}</td>
+                <td class="py-2 pr-3 text-white/70">{{ ex.targetRepRange || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: exercise library -->
+    <section class="border border-white/10 bg-white/5 p-4">
+      <div class="label mb-2">Exercise library</div>
+      <div class="sub mb-3">Add extras beyond the split day.</div>
+
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_104px_140px]">
+        <select
+          class="w-full min-w-0 border border-white/10 bg-white px-3 py-2 text-sm text-black outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/40"
+          [ngModel]="selectedExerciseId"
+          (ngModelChange)="selectedExerciseId = $event"
+          [title]="selectedExerciseName ?? ''"
+        >
+          <option [ngValue]="null">pick an exercise</option>
+          <option *ngFor="let e of exercises" [ngValue]="e.id">{{ e.name }}</option>
+        </select>
+        <input
+          type="number"
+          class="w-full min-w-0 border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/40"
+          [(ngModel)]="extraSets"
+          placeholder="Sets"
+        />
+        <input
+          type="text"
+          class="w-full min-w-0 border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/40"
+          [(ngModel)]="extraRepRange"
+          placeholder="8-12"
+        />
+      </div>
+
+      <div *ngIf="selectedExerciseName" class="mt-2 text-xs text-white/70">
+        Selected: <span class="font-semibold text-white/90">{{ selectedExerciseName }}</span>
+      </div>
+
+      <button
+        type="button"
+        (click)="addExtraExercise()"
+        class="mt-2 inline-flex w-full items-center justify-center border border-white/10 bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
+      >
+        Add to draft
+      </button>
+
+      <div class="hint mt-2">Extras you add here appear in the draft below.</div>
+    </section>
+  </div>
+
+  <!-- BOTTOM: draft / selected program -->
+  <section class="mt-6 border border-white/10 bg-gradient-to-b from-white/5 to-black/20 p-5">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div class="text-lg font-black tracking-tight text-white">Draft program</div>
+        <div class="sub mt-1">Selected for day · ready to send to Today</div>
+      </div>
+      <button
+        type="button"
+        (click)="selectAsTodaysProgram()"
+        [disabled]="plannedForDay.length === 0"
+        class="inline-flex items-center border border-emerald-300/30 bg-emerald-500/10 px-5 py-2.5 text-sm font-semibold text-emerald-100 hover:bg-emerald-500/20 disabled:opacity-40"
+      >
+        Select as today’s program
+      </button>
     </div>
-  </p-card>
+
+    <div *ngIf="plannedForDay.length === 0" class="mt-4 text-sm text-white/70">
+      Nothing selected yet. Click “Choose this split” or add exercises from the library.
+    </div>
+
+    <div *ngIf="plannedForDay.length > 0" class="mt-4 overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="text-white/70">
+          <tr class="border-b border-white/10">
+            <th class="py-2 pr-3 w-10">#</th>
+            <th class="py-2 pr-3">Exercise</th>
+            <th class="py-2 pr-3 w-24">Sets</th>
+            <th class="py-2 pr-3 w-24">Reps</th>
+            <th class="py-2 pr-3 w-20">Src</th>
+            <th class="py-2 w-24"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of plannedForDay; let i = index" class="border-b border-white/5">
+            <td class="py-2 pr-3 text-white/60">{{ i + 1 }}</td>
+            <td class="py-2 pr-3 font-semibold text-white/90">{{ p.exerciseName }}</td>
+            <td class="py-2 pr-3 text-white/80">{{ p.targetSets }}</td>
+            <td class="py-2 pr-3 text-white/80">{{ p.targetRepRange || '-' }}</td>
+            <td class="py-2 pr-3 text-white/60">{{ p.source }}</td>
+            <td class="py-2">
+              <button
+                type="button"
+                (click)="removePlanned(p)"
+                class="inline-flex items-center justify-center border border-red-300/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-200 hover:bg-red-500/20"
+                aria-label="Remove from program"
+                title="Remove from program"
+              >
+                Remove
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <div *ngIf="error" class="err">{{ error }}</div>
 </div>

@@ -16,6 +16,9 @@ public class NutritionFoodLog
     public double C { get; set; }
     public double F { get; set; }
 
+    // Flexible micronutrients payload (keys/values/units), stored as JSON.
+    public string? MicrosJson { get; set; }
+
     public DateTime LoggedAtUtc { get; set; }
 }
 
@@ -45,6 +48,7 @@ public record NutritionFoodLogDto(
     double P,
     double C,
     double F,
+    string? MicrosJson,
     DateTime LoggedAtUtc
 );
 
@@ -56,7 +60,8 @@ public record CreateNutritionFoodLogRequest(
     double Kcal,
     double P,
     double C,
-    double F
+    double F,
+    string? MicrosJson
 );
 
 public record NutritionUsualDto(

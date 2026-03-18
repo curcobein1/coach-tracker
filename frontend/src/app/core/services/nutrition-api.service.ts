@@ -12,6 +12,7 @@ export interface NutritionFoodLogDto {
   p: number;
   c: number;
   f: number;
+  microsJson?: string | null;
   loggedAtUtc: string;
 }
 

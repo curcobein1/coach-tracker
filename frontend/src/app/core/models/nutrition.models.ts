@@ -6,6 +6,7 @@ export interface LoggedFood {
   p: number;
   c: number;
   f: number;
+  micros?: Record<string, { label: string; unit: string; value: number }> | null;
   at: string; // ISO
 }
 

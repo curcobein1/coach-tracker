@@ -20,4 +20,8 @@ export class CalendarApiService {
   assignDay(date: string, splitDayId: number): Observable<{ date: string; splitDayId: number }> {
     return this.http.put<{ date: string; splitDayId: number }>(`${this.base}/day/${date}?splitDayId=${splitDayId}`, {});
   }
+
+  clearDay(date: string): Observable<{ date: string; cleared: boolean }> {
+    return this.http.delete<{ date: string; cleared: boolean }>(`${this.base}/day/${date}`);
+  }
 }

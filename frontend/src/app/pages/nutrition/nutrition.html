@@ -7,13 +7,13 @@
         [(ngModel)]="query"
         placeholder="Search foods..."
         (keyup.enter)="searchFoods()"
-        class="w-full xl border border-white-600 bg-blue-600/70 px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/60"
+        class="w-full xl border border-white-600 bg-blue-600/70 px-3 py-2 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-sky-600/50"
       />
     </div>
     <button
       type="button"
       (click)="searchFoods()"
-      class="inline-flex items-center xl bg-transparent-500 px-4 py-2 text-sm font-medium text-white-950 hover:bg-sky-400 transition"
+      class="inline-flex items-center xl bg-transparent-500 px-4 py-2 text-sm font-medium text-white-950 hover:bg-blue-700 transition"
     >
       Search USDA
     </button>
@@ -45,7 +45,7 @@
         @for (food of results; track food.fdcId) {
         <button
           type="button"
-          class="w-full border border-white-800 bg-blue-600 px-3 py-2 text-left text-xs hover:border-sky-500 hover:bg-blue-700 transition"
+          class="w-full border border-white-800 bg-blue-600 px-3 py-2 text-left text-xs hover:border-white-500 hover:bg-blue-700 transition"
           (click)="selectFood(food)"
         >
           <div class="flex justify-between gap-2">
@@ -67,6 +67,14 @@
               }
             </div>
           </div>
+
+          @if (food.brandName) {
+          <span class="mt-1 inline-flex truncate border border-white px-1 py-0.5 bg-blue-600 text-[10px] text-white/80"
+          style ="max-width: min(32ch, 100%"
+          >
+            {{ food.brandName }}
+          </span>
+          }
 
           <div class="mt-1 flex flex-wrap gap-1.5 text-[10px] text-slate-300">
             <span class="border border-white-700 bg-blue-600 px-1 py-0.5 text-[10px]">
@@ -94,7 +102,7 @@
         <h3 class="text-sm font-semibold text-slate-100 mb-2 tracking-tight">Food details</h3>
 
         @if (isLoadingDetail) {
-        <div class="text-xs text-slate-400">Loading details…</div>
+        <div class="text-xs text-white-400/30">Loading details…</div>
         }
 
         @if (!isLoadingDetail && !selectedFood) {
@@ -135,7 +143,7 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <label class="text-[11px] text-slate-400">Grams</label>
+            <label class="text-[11px] text-white-400">Grams</label>
             <input
               type="number"
               [(ngModel)]="grams"
@@ -145,7 +153,7 @@
             <button
               type="button"
               (click)="addSelectedToToday()"
-              class="inline-flex items-center border border-white-600 bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition"
+              class="inline-flex items-center border border-white-600 bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg--500 transition"
             >
               Add to today
             </button>
@@ -208,7 +216,7 @@
       <!-- Usual foods under details -->
       <div class="border border-white-500 bg-blue-600 px-3 py-2 text-xs">
         <div class="mb-1 flex items-center justify_between">
-          <h4 class="text-xs font-semibold text-slate-200">Usuals</h4>
+          <h4 class="text-xs font-semibold text-slate-200">Usuals &nbsp;</h4>
           <span class="text-[10px] text-white-500">
             {{ usuals.length }} saved
           </span>
@@ -222,7 +230,7 @@
           @for (u of usuals; track u.fdcId) {
           <button
             type="button"
-            class="border border-white-800 bg-blue-600 px-3 py-2 text-left text-[11px] hover:border-emerald-500 hover:bg-emerald-400/30 transition"
+            class="border border-white-800 bg-blue-600 px-3 py-2 text-left text-[11px] hover:border-white-500 hover:bg-blue-700 transition"
             (click)="useUsual(u)"
           >
             <div class="flex justify-between gap-2">
