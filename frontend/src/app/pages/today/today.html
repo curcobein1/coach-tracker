@@ -38,16 +38,64 @@
     </p-table>
   </p-card>
 
-  <p-card styleClass="mt-4">
-    <div class="flex gap-2 flex-wrap items-center">
-      <input pInputText class="p-inputtext-sm" asciiOnly placeholder="Exercise (Bench Press)" [(ngModel)]="exerciseName" />
-      <input pInputText class="p-inputtext-sm" asciiOnly placeholder='kg (e.g., 80 or "40+bar")' inputmode="decimal" [(ngModel)]="kg" (ngModelChange)="onKgInput($event)" />
-      <input pInputText class="p-inputtext-sm" type="number" placeholder="reps" [(ngModel)]="reps" style="width: 80px;" />
-      <input pInputText class="p-inputtext-sm" type="number" placeholder="RIR" [(ngModel)]="rir" style="width: 80px;" />
-      <p-button label="Log set locally" (onClick)="logSet()" size="small"></p-button>
+  <section class="mt-4 border border-white-500 bg-blue-600 px-4 py-3 text-xs">
+    <div class="mb-2 flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-white">Log set locally</h3>
+      <span class="text-[11px] text-white/70">Exercise · kg · reps · RIR</span>
     </div>
-    <div *ngIf="kgError" class="err mt-2">{{ kgError }}</div>
-  </p-card>
+    <div class="flex flex-wrap gap-3 items-end">
+      <div class="flex flex-col gap-1 min-w-[180px]">
+        <label class="text-[11px] text-white/80">Exercise</label>
+        <input
+          type="text"
+          asciiOnly
+          placeholder="Bench Press"
+          [(ngModel)]="exerciseName"
+          class="w-full border border-white-600 bg-blue-600 px-2 py-1 text-xs text-white outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/70"
+        />
+      </div>
+      <div class="flex flex-col gap-1 min-w-[140px]">
+        <label class="text-[11px] text-white/80">Weight (kg)</label>
+        <input
+          type="text"
+          asciiOnly
+          placeholder='80 or "40+bar"'
+          inputmode="decimal"
+          [(ngModel)]="kg"
+          (ngModelChange)="onKgInput($event)"
+          class="w-full border border-white-600 bg-blue-600 px-2 py-1 text-xs text-white outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/70"
+        />
+      </div>
+      <div class="flex flex-col gap-1 w-20">
+        <label class="text-[11px] text-white/80">Reps</label>
+        <input
+          type="number"
+          placeholder="8"
+          [(ngModel)]="reps"
+          class="w-full border border-white-600 bg-blue-600 px-2 py-1 text-xs text-white outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/70"
+        />
+      </div>
+      <div class="flex flex-col gap-1 w-20">
+        <label class="text-[11px] text-white/80">RIR</label>
+        <input
+          type="number"
+          placeholder="2"
+          [(ngModel)]="rir"
+          class="w-full border border-white-600 bg-blue-600 px-2 py-1 text-xs text-white outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400/70"
+        />
+      </div>
+      <button
+        type="button"
+        (click)="logSet()"
+        class="inline-flex items-center border border-white-600 bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition"
+      >
+        Log set
+      </button>
+    </div>
+    <div *ngIf="kgError" class="mt-2 text-[11px] text-red-200">
+      {{ kgError }}
+    </div>
+  </section>
 
   <p-card styleClass="mt-4">
     <div class="title">Session notes</div>

@@ -36,6 +36,10 @@ export class NutritionComponent {
     return this.nutrition.getUsuals();
   }
 
+  isUsualFood(food: FoodSearchItem): boolean {
+    return this.usuals.some((u) => u.fdcId === food.fdcId);
+  }
+
   searchFoods() {
     const trimmed = this.query.trim();
 
@@ -97,6 +101,26 @@ export class NutritionComponent {
         this.isLoadingDetail = false;
         this.cdr.detectChanges();
       },
+    });
+  }
+
+  toggleResultUsual(food: FoodSearchItem): void {
+    if (this.isUsualFood(food)) {
+      this.nutrition.removeUsual(food.fdcId);
+      return;
+    }
+
+    const g = 100;
+    const scale = (v?: number | null) => v ?? 0;
+
+    this.nutrition.addOrUpdateUsual({
+      fdcId: food.fdcId,
+      name: food.description,
+      grams: g,
+      kcal: scale(food.calories),
+      p: scale(food.protein),
+      c: scale(food.carbs),
+      f: scale(food.fat),
     });
   }
 
@@ -178,6 +202,10 @@ export class NutritionComponent {
       },
       undefined
     );
+  }
+
+  toggleUsualFromList(u: UsualFood): void {
+    this.nutrition.removeUsual(u.fdcId);
   }
 }
 
